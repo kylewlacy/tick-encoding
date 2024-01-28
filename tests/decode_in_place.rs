@@ -20,65 +20,83 @@ fn test_decode_in_place() {
     );
 }
 
-// #[test]
-// fn test_decode_invalid_byte_error() {
-//     assert_matches!(decode(&[0xFF]), Err(DecodeError::InvalidByte(0xFF)));
-//     assert_matches!(decode(&[0x00]), Err(DecodeError::InvalidByte(0x00)));
-// }
+#[test]
+fn test_decode_invalid_byte_error() {
+    assert_matches!(
+        decode_in_place(&mut [0xFF]),
+        Err(DecodeError::InvalidByte(0xFF))
+    );
+    assert_matches!(
+        decode_in_place(&mut [0x00]),
+        Err(DecodeError::InvalidByte(0x00))
+    );
+}
 
-// #[test]
-// fn test_decode_unexpected_end_error() {
-//     assert_matches!(decode(b"`"), Err(DecodeError::UnexpectedEnd));
-//     assert_matches!(decode(b"`F"), Err(DecodeError::UnexpectedEnd));
-//     assert_matches!(decode(b"`F0`"), Err(DecodeError::UnexpectedEnd));
-//     assert_matches!(decode(b"`F0`9"), Err(DecodeError::UnexpectedEnd));
-// }
+#[test]
+fn test_decode_unexpected_end_error() {
+    assert_matches!(
+        decode_in_place(&mut b"`".to_vec()),
+        Err(DecodeError::UnexpectedEnd)
+    );
+    assert_matches!(
+        decode_in_place(&mut b"`F".to_vec()),
+        Err(DecodeError::UnexpectedEnd)
+    );
+    assert_matches!(
+        decode_in_place(&mut b"`F0`".to_vec()),
+        Err(DecodeError::UnexpectedEnd)
+    );
+    assert_matches!(
+        decode_in_place(&mut b"`F0`9".to_vec()),
+        Err(DecodeError::UnexpectedEnd)
+    );
+}
 
-// #[test]
-// fn test_decode_lowercase_hex_error() {
-//     assert_matches!(
-//         decode(b"`fe"),
-//         Err(DecodeError::LowercaseHex(EscapedHex(b'f', b'e')))
-//     );
-//     assert_matches!(
-//         decode(b"`0e"),
-//         Err(DecodeError::LowercaseHex(EscapedHex(b'0', b'e')))
-//     );
-//     assert_matches!(
-//         decode(b"`f0"),
-//         Err(DecodeError::LowercaseHex(EscapedHex(b'f', b'0')))
-//     );
-// }
+#[test]
+fn test_decode_lowercase_hex_error() {
+    assert_matches!(
+        decode_in_place(&mut b"`fe".to_vec()),
+        Err(DecodeError::LowercaseHex(EscapedHex(b'f', b'e')))
+    );
+    assert_matches!(
+        decode_in_place(&mut b"`0e".to_vec()),
+        Err(DecodeError::LowercaseHex(EscapedHex(b'0', b'e')))
+    );
+    assert_matches!(
+        decode_in_place(&mut b"`f0".to_vec()),
+        Err(DecodeError::LowercaseHex(EscapedHex(b'f', b'0')))
+    );
+}
 
-// #[test]
-// fn test_decode_invalid_hex_error() {
-//     assert_matches!(
-//         decode(b"`GE"),
-//         Err(DecodeError::InvalidHex(EscapedHex(b'G', b'E')))
-//     );
-//     assert_matches!(
-//         decode(b"`0G"),
-//         Err(DecodeError::InvalidHex(EscapedHex(b'0', b'G')))
-//     );
-//     assert_matches!(
-//         decode(b"`G0"),
-//         Err(DecodeError::InvalidHex(EscapedHex(b'G', b'0')))
-//     );
+#[test]
+fn test_decode_invalid_hex_error() {
+    assert_matches!(
+        decode_in_place(&mut b"`GE".to_vec()),
+        Err(DecodeError::InvalidHex(EscapedHex(b'G', b'E')))
+    );
+    assert_matches!(
+        decode_in_place(&mut b"`0G".to_vec()),
+        Err(DecodeError::InvalidHex(EscapedHex(b'0', b'G')))
+    );
+    assert_matches!(
+        decode_in_place(&mut b"`G0".to_vec()),
+        Err(DecodeError::InvalidHex(EscapedHex(b'G', b'0')))
+    );
 
-//     assert_matches!(
-//         decode(b"`fG"),
-//         Err(DecodeError::InvalidHex(EscapedHex(b'f', b'G')))
-//     );
-//     assert_matches!(
-//         decode(b"`gF"),
-//         Err(DecodeError::InvalidHex(EscapedHex(b'g', b'F')))
-//     );
-// }
+    assert_matches!(
+        decode_in_place(&mut b"`fG".to_vec()),
+        Err(DecodeError::InvalidHex(EscapedHex(b'f', b'G')))
+    );
+    assert_matches!(
+        decode_in_place(&mut b"`gF".to_vec()),
+        Err(DecodeError::InvalidHex(EscapedHex(b'g', b'F')))
+    );
+}
 
-// #[test]
-// fn test_decode_unexpected_escape_error() {
-//     assert_matches!(
-//         decode(b"`65"),
-//         Err(DecodeError::UnexpectedEscape(EscapedHex(b'6', b'5'), 'e'))
-//     );
-// }
+#[test]
+fn test_decode_unexpected_escape_error() {
+    assert_matches!(
+        decode_in_place(&mut b"`65".to_vec()),
+        Err(DecodeError::UnexpectedEscape(EscapedHex(b'6', b'5'), 'e'))
+    );
+}
