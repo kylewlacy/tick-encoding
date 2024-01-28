@@ -93,3 +93,25 @@ jobs:
           PROPTEST_CASES: "16"
           PROPTEST_DISABLE_FAILURE_PERSISTENCE: "true"
           MIRIFLAGS: "-Zmiri-env-forward=PROPTEST_DISABLE_FAILURE_PERSISTENCE -Zmiri-env-forward=PROPTEST_CASES"
+  check-semver:
+    name: Check crate semver
+    if: github.repository == 'kylewlacy/tick-encoding' && startsWith(github.ref, 'refs/tags/v')
+    needs: [check, test, benchmark, miri]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Check semver
+        uses: obi1kenobi/cargo-semver-checks-action@v2
+  publish:
+    name: Publish crate
+    if: github.repository == 'kylewlacy/tick-encoding' && startsWith(github.ref, 'refs/tags/v')
+    needs: [check, test, benchmark, miri, check-semver]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Publish crate
+        run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
