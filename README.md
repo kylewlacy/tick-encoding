@@ -26,6 +26,14 @@ let decoded_str = std::str::from_utf8(&decoded).unwrap();
 assert_eq!(decoded_str, "hello, world! 🙂");
 ```
 
+## Crate features
+
+The `tick-encoding` crate includes the following features:
+
+- `std` (default): Enables functionality using Rust's standard library. Disable to build in `#![no_std]` mode.
+- `alloc` (default): Enables functionality that depends on the global allocator. Disabling this will only give access to a subset of functionality.
+- `safe`: Avoid unsafe code. By default, a small amount of unsafe is used (all checked with extensive unit tests, property tests, and Miri checks). Enabling this feature enables the `#![deny(unsafe_code)]` lint at the crate level, and switches to purely safe code.
+
 ## Encoding scheme
 
 The encoding scheme for Tick Encoding is straightforward:
