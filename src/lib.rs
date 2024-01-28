@@ -304,8 +304,24 @@ pub enum DecodeError {
 }
 
 /// A two-digit escaped hex sequence, prefixed with a backtick.
-#[derive(Debug)]
 pub struct EscapedHex(pub u8, pub u8);
+
+impl std::fmt::Debug for EscapedHex {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Self(high, low) = self;
+        if requires_escape(*high) || requires_escape(*low) {
+            f.debug_tuple("EscapedHex")
+                .field(&self.0)
+                .field(&self.1)
+                .finish()
+        } else {
+            f.debug_tuple("EscapedHex")
+                .field(&(*high as char))
+                .field(&(*low as char))
+                .finish()
+        }
+    }
+}
 
 impl std::fmt::Display for EscapedHex {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
