@@ -24,7 +24,12 @@ jobs:
           - "1.70.0"
           - stable
           - beta
-    name: Run tests (${{ matrix.toolchain }})
+        features:
+          - "default"
+          - "std"
+          - "alloc"
+          - "none"
+    name: Run tests (${{ matrix.toolchain }}, ${{ matrix.features }})
     runs-on: ubuntu-22.04
     env:
       TOOLCHAIN: ${{ matrix.toolchain }}
@@ -34,7 +39,22 @@ jobs:
       - name: Install toolchain
         run: rustup toolchain install "$TOOLCHAIN"
       - name: Run tests
-        run: cargo +"$TOOLCHAIN" test
+        run: |
+          case "$FEATURES" in
+            "default" )
+              feature_flags=()
+              ;;
+            "none" )
+              feature_flags=("--no-default-features")
+              ;;
+            * )
+              feature_flags=("--no-default-features" "--features" "$FEATURES")
+              ;;
+          esac
+          cargo +"$TOOLCHAIN" test "${feature_flags[@]}"
+
+        env:
+          FEATURES: ${{ matrix.features }}
   benchmark:
     name: Run benchmarks
     runs-on: ubuntu-22.04
