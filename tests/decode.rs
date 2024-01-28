@@ -35,15 +35,15 @@ fn test_decode_unexpected_end_error() {
 fn test_decode_lowercase_hex_error() {
     assert_matches!(
         decode(b"`fe"),
-        Err(DecodeError::LowercaseHex(EscapedHex('f', 'e')))
+        Err(DecodeError::LowercaseHex(EscapedHex(b'f', b'e')))
     );
     assert_matches!(
         decode(b"`0e"),
-        Err(DecodeError::LowercaseHex(EscapedHex('0', 'e')))
+        Err(DecodeError::LowercaseHex(EscapedHex(b'0', b'e')))
     );
     assert_matches!(
         decode(b"`f0"),
-        Err(DecodeError::LowercaseHex(EscapedHex('f', '0')))
+        Err(DecodeError::LowercaseHex(EscapedHex(b'f', b'0')))
     );
 }
 
@@ -51,24 +51,24 @@ fn test_decode_lowercase_hex_error() {
 fn test_decode_invalid_hex_error() {
     assert_matches!(
         decode(b"`GE"),
-        Err(DecodeError::InvalidHex(EscapedHex('G', 'E')))
+        Err(DecodeError::InvalidHex(EscapedHex(b'G', b'E')))
     );
     assert_matches!(
         decode(b"`0G"),
-        Err(DecodeError::InvalidHex(EscapedHex('0', 'G')))
+        Err(DecodeError::InvalidHex(EscapedHex(b'0', b'G')))
     );
     assert_matches!(
         decode(b"`G0"),
-        Err(DecodeError::InvalidHex(EscapedHex('G', '0')))
+        Err(DecodeError::InvalidHex(EscapedHex(b'G', b'0')))
     );
 
     assert_matches!(
         decode(b"`fG"),
-        Err(DecodeError::InvalidHex(EscapedHex('f', 'G')))
+        Err(DecodeError::InvalidHex(EscapedHex(b'f', b'G')))
     );
     assert_matches!(
         decode(b"`gF"),
-        Err(DecodeError::InvalidHex(EscapedHex('g', 'F')))
+        Err(DecodeError::InvalidHex(EscapedHex(b'g', b'F')))
     );
 }
 
@@ -76,6 +76,6 @@ fn test_decode_invalid_hex_error() {
 fn test_decode_unexpected_escape_error() {
     assert_matches!(
         decode(b"`65"),
-        Err(DecodeError::UnexpectedEscape(EscapedHex('6', '5'), 'e'))
+        Err(DecodeError::UnexpectedEscape(EscapedHex(b'6', b'5'), 'e'))
     );
 }

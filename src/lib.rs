@@ -260,22 +260,16 @@ fn hex_bytes_to_byte([high, low]: [u8; 2]) -> Result<u8, DecodeError> {
             (high_value << 4) | low_value
         }
         (HexCharResult::Invalid(_), _) | (_, HexCharResult::Invalid(_)) => {
-            return Err(DecodeError::InvalidHex(EscapedHex(
-                high as char,
-                low as char,
-            )));
+            return Err(DecodeError::InvalidHex(EscapedHex(high, low)));
         }
         (HexCharResult::Lowercase(_), _) | (_, HexCharResult::Lowercase(_)) => {
-            return Err(DecodeError::LowercaseHex(EscapedHex(
-                high as char,
-                low as char,
-            )));
+            return Err(DecodeError::LowercaseHex(EscapedHex(high, low)));
         }
     };
 
     if !requires_escape(byte) {
         return Err(DecodeError::UnexpectedEscape(
-            EscapedHex(high as char, low as char),
+            EscapedHex(high, low),
             byte as char,
         ));
     }
@@ -311,10 +305,15 @@ pub enum DecodeError {
 
 /// A two-digit escaped hex sequence, prefixed with a backtick.
 #[derive(Debug)]
-pub struct EscapedHex(pub char, pub char);
+pub struct EscapedHex(pub u8, pub u8);
 
 impl std::fmt::Display for EscapedHex {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "`{}{}", self.0, self.1)
+        let Self(high, low) = self;
+        if requires_escape(*high) || requires_escape(*low) {
+            write!(f, "0x{:02X} 0x{:02X}", high, low)
+        } else {
+            write!(f, "`{}{}", *high as char, *low as char)
+        }
     }
 }
