@@ -67,6 +67,7 @@ jobs:
 
         env:
           FEATURES: ${{ matrix.features }}
+          PROPTEST_CASES: "10000"
   benchmark:
     name: Run benchmarks
     runs-on: ubuntu-22.04
