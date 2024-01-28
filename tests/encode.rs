@@ -1,3 +1,5 @@
+#![cfg(feature = "alloc")]
+
 use tick_encoding::encode;
 
 #[test]

@@ -1,3 +1,5 @@
+#![cfg(feature = "alloc")]
+
 use std::borrow::Cow;
 
 use assert_matches::assert_matches;

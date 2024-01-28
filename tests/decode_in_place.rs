@@ -21,7 +21,7 @@ fn test_decode_in_place() {
 }
 
 #[test]
-fn test_decode_invalid_byte_error() {
+fn test_decode_in_place_invalid_byte_error() {
     assert_matches!(
         decode_in_place(&mut [0xFF]),
         Err(DecodeError::InvalidByte(0xFF))
@@ -33,7 +33,7 @@ fn test_decode_invalid_byte_error() {
 }
 
 #[test]
-fn test_decode_unexpected_end_error() {
+fn test_decode_in_place_unexpected_end_error() {
     assert_matches!(
         decode_in_place(&mut b"`".to_vec()),
         Err(DecodeError::UnexpectedEnd)
@@ -53,7 +53,7 @@ fn test_decode_unexpected_end_error() {
 }
 
 #[test]
-fn test_decode_lowercase_hex_error() {
+fn test_decode_in_place_lowercase_hex_error() {
     assert_matches!(
         decode_in_place(&mut b"`fe".to_vec()),
         Err(DecodeError::LowercaseHex(EscapedHex(b'f', b'e')))
@@ -69,7 +69,7 @@ fn test_decode_lowercase_hex_error() {
 }
 
 #[test]
-fn test_decode_invalid_hex_error() {
+fn test_decode_in_place_invalid_hex_error() {
     assert_matches!(
         decode_in_place(&mut b"`GE".to_vec()),
         Err(DecodeError::InvalidHex(EscapedHex(b'G', b'E')))
@@ -94,7 +94,7 @@ fn test_decode_invalid_hex_error() {
 }
 
 #[test]
-fn test_decode_unexpected_escape_error() {
+fn test_decode_in_place_unexpected_escape_error() {
     assert_matches!(
         decode_in_place(&mut b"`65".to_vec()),
         Err(DecodeError::UnexpectedEscape(EscapedHex(b'6', b'5'), 'e'))

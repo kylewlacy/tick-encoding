@@ -1,10 +1,15 @@
-#![doc = include_str!("../README.md")]
-
-use std::borrow::Cow;
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "std", doc = include_str!("../README.md"))]
 
 pub(crate) mod decoder;
 pub(crate) mod encoder;
 pub mod iter;
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
+#[cfg(feature = "alloc")]
+use alloc::borrow::Cow;
 
 /// Encode the given input as a string, escaping any bytes that require it.
 /// If no bytes require escaping, then the result will be borrowed from
@@ -13,12 +18,14 @@ pub mod iter;
 /// ## Example
 ///
 /// ```
+/// # #![cfg(feature = "alloc")]
 /// let encoded = tick_encoding::encode(b"hello world!");
 /// assert_eq!(encoded, "hello world!");
 ///
 /// let encoded = tick_encoding::encode(&[0x00, 0xFF]);
 /// assert_eq!(encoded, "`00`FF");
 /// ```
+#[cfg(feature = "alloc")]
 pub fn encode(input: &[u8]) -> Cow<str> {
     // Get the first index that needs to be escaped
     let escape_index = input.iter().position(|byte| requires_escape(*byte));
@@ -31,7 +38,7 @@ pub fn encode(input: &[u8]) -> Cow<str> {
 
             // SAFETY: We know the input up to this point is valid ASCII and
             // UTF-8, since nothing up to this point needs escaping
-            let validated = unsafe { std::str::from_utf8_unchecked(validated) };
+            let validated = unsafe { core::str::from_utf8_unchecked(validated) };
 
             let mut output = String::with_capacity(input.len() + 1);
             output.push_str(validated);
@@ -75,12 +82,14 @@ where
 /// ## Example
 ///
 /// ```
+/// # #![cfg(feature = "alloc")]
 /// let decoded = tick_encoding::decode(b"hello world!").unwrap();
 /// assert_eq!(decoded, "hello world!".as_bytes());
 ///
 /// let decoded = tick_encoding::decode(b"`00`FF").unwrap();
 /// assert_eq!(decoded, [0x00, 0xFF].as_slice());
 /// ```
+#[cfg(feature = "alloc")]
 pub fn decode(input: &[u8]) -> Result<Cow<[u8]>, DecodeError> {
     // Get the first index that isn't already a valid unescaped byte
     let escape_index = input.iter().position(|byte| requires_escape(*byte));
@@ -195,11 +204,13 @@ pub fn requires_escape(byte: u8) -> bool {
 /// ## Example
 ///
 /// ```
+/// # #![cfg(feature = "alloc")]
 /// let mut output = String::new();
 /// let count = tick_encoding::encode_to_string("hello, world! 🙂".as_bytes(), &mut output);
 /// assert_eq!(output, "hello, world! `F0`9F`99`82");
 /// assert_eq!(count, 26);
 /// ```
+#[cfg(feature = "alloc")]
 pub fn encode_to_string(input: &[u8], output: &mut String) -> usize {
     let mut written = 0;
     output.reserve(input.len());
@@ -234,6 +245,7 @@ pub fn encode_to_string(input: &[u8], output: &mut String) -> usize {
 /// assert_eq!(output, b"hello, world! `F0`9F`99`82");
 /// assert_eq!(count, 26);
 /// ```
+#[cfg(feature = "alloc")]
 pub fn encode_to_vec(input: &[u8], output: &mut Vec<u8>) -> usize {
     let mut written = 0;
     output.reserve(input.len());
@@ -269,6 +281,7 @@ pub fn encode_to_vec(input: &[u8], output: &mut Vec<u8>) -> usize {
 /// assert_eq!(output_str, "hello, world! 🙂");
 /// assert_eq!(count, 18);
 /// ```
+#[cfg(feature = "alloc")]
 pub fn decode_to_vec(input: &[u8], output: &mut Vec<u8>) -> Result<usize, DecodeError> {
     let mut written = 0;
     let mut iter = input.iter();
@@ -365,36 +378,43 @@ fn hex_bytes_to_byte([high, low]: [u8; 2]) -> Result<u8, DecodeError> {
 }
 
 /// An error trying to decode a tick-encoded string.
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug)]
+#[cfg_attr(feature = "dep:thiserror", derive(thiserror::Error))]
 pub enum DecodeError {
     /// Encountered an invalid byte in the string. This could either by a
     /// non-ASCII byte or an ASCII byte that requires escaping (see
     /// [requires_escape]).
-    #[error("invalid encoded byte 0x{0:02x}")]
+    #[cfg_attr(feature = "dep:thiserror", error("invalid encoded byte 0x{0:02x}"))]
     InvalidByte(u8),
     /// Reached the end of the string following a backtick (\`). A backtick
     /// must be followed by either another backtick or a 2-digit hex value.
-    #[error("unexpected end after `")]
+    #[cfg_attr(feature = "dep:thiserror", error("unexpected end after `"))]
     UnexpectedEnd,
     /// Tried to decode a 2-digit hex value, but the value does not require
     /// escaping (see [requires_escape]).
-    #[error("unexpected escape {0}, expected {1}")]
+    #[cfg_attr(
+        feature = "dep:thiserror",
+        error("unexpected escape {0}, expected {1}")
+    )]
     UnexpectedEscape(EscapedHex, char),
     /// Tried to decode a 2-digit hex value, but the hex value contained
     /// the values `[a-f]`. Escaped hex values must use `[A-F]`.
-    #[error("expected uppercase hex sequence, found {0}")]
+    #[cfg_attr(
+        feature = "dep:thiserror",
+        error("expected uppercase hex sequence, found {0}")
+    )]
     LowercaseHex(EscapedHex),
     /// Tried to decode a 2-digit hex value, but an invalid hex digit
     /// was found. Escaped hex values must use the characters `[0-9A-F]`.
-    #[error("invalid hex sequence {0}")]
+    #[cfg_attr(feature = "dep:thiserror", error("invalid hex sequence {0}"))]
     InvalidHex(EscapedHex),
 }
 
 /// A two-digit escaped hex sequence, prefixed with a backtick.
 pub struct EscapedHex(pub u8, pub u8);
 
-impl std::fmt::Debug for EscapedHex {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for EscapedHex {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let Self(high, low) = self;
         if requires_escape(*high) || requires_escape(*low) {
             f.debug_tuple("EscapedHex")
@@ -410,8 +430,8 @@ impl std::fmt::Debug for EscapedHex {
     }
 }
 
-impl std::fmt::Display for EscapedHex {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for EscapedHex {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let Self(high, low) = self;
         if requires_escape(*high) || requires_escape(*low) {
             write!(f, "0x{:02X} 0x{:02X}", high, low)

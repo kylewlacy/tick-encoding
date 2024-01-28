@@ -1,3 +1,5 @@
+#![cfg(feature = "alloc")]
+
 use assert_matches::assert_matches;
 use tick_encoding::{decode, DecodeError, EscapedHex};
 
