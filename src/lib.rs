@@ -368,7 +368,7 @@ fn hex_bytes_to_byte([high, low]: [u8; 2]) -> Result<u8, DecodeError> {
         }
     };
 
-    if !requires_escape(byte) {
+    if byte == b'`' || !requires_escape(byte) {
         return Err(DecodeError::UnexpectedEscape(
             EscapedHex(high, low),
             byte as char,

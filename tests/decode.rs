@@ -81,3 +81,11 @@ fn test_decode_unexpected_escape_error() {
         Err(DecodeError::UnexpectedEscape(EscapedHex(b'6', b'5'), 'e'))
     );
 }
+
+#[test]
+fn test_decode_unexpected_tick_escape_error() {
+    assert_matches!(
+        decode(b"`60"),
+        Err(DecodeError::UnexpectedEscape(EscapedHex(b'6', b'0'), '`'))
+    );
+}

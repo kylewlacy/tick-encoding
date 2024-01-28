@@ -6,3 +6,5 @@
 # everyone who runs the test benefits from these saved cases.
 cc b876e5a5ab0ad10e4ab0239dad5554f5c8db12277ec4ead57173588aa7836529 # shrinks to bytes = [127, 127]
 cc edb869e48244ff23044519ee43060d37a8daa589dfb255938ce3f468afbb1ef9 # shrinks to bytes = [127, 127, 0, 127, 127, 14, 0, 127, 127, 127, 127, 127, 127, 127, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 96]
+cc d88e7cdc4b5757cd88d8f12f987b635f00f1c4ff0d264d892e33f417625cd898 # shrinks to possibly_encoded_string = "```"
+cc 23b537b0931d800ce3cf2821006094b7938dda2130aa5ddef8fa923a50193e87 # shrinks to possibly_encoded_string = "`60"
