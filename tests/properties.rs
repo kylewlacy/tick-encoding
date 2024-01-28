@@ -123,4 +123,13 @@ proptest! {
         assert_eq!(buffer_appended, bytes);
         assert_eq!(count, bytes.len());
     }
+
+    #[test]
+    fn decode_in_place(bytes in any::<Vec<u8>>()) {
+        let encoded = tick_encoding::encode(&bytes);
+
+        let mut buffer = encoded.clone().into_owned().into_bytes();
+        let decoded = tick_encoding::decode_in_place(&mut buffer).unwrap();
+        assert_eq!(decoded, bytes);
+    }
 }

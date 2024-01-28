@@ -83,6 +83,57 @@ pub fn decode(input: &[u8]) -> Result<Cow<[u8]>, DecodeError> {
     }
 }
 
+/// Take a byte slice containing a tick-encoded ASCII string, and decode it
+/// in-place, writing back into the same byte slice. Returns a sub-slice
+/// containing just the decoded bytes (the bytes past the returned sub-slice
+/// are left unchanged).
+///
+/// ## Example
+///
+/// ```rust
+/// let mut buffer = b"bytes: `00`01`02`03".to_vec();
+/// let decoded = tick_encoding::decode_in_place(&mut buffer).unwrap();
+/// assert_eq!(decoded, b"bytes: \x00\x01\x02\x03");
+/// ```
+pub fn decode_in_place(input: &mut [u8]) -> Result<&mut [u8], DecodeError> {
+    // Get the first index that isn't already a valid unescaped byte
+    let Some(escape_index) = input.iter().position(|byte| requires_escape(*byte)) else {
+        // Nothing needs to be unescaped
+        return Ok(input);
+    };
+
+    let mut head = escape_index;
+    let mut tail = escape_index;
+    while tail < input.len() {
+        if input[tail] == b'`' {
+            let escaped = input.get(tail + 1).ok_or(DecodeError::UnexpectedEnd)?;
+            match escaped {
+                b'`' => {
+                    input[head] = b'`';
+                    tail += 2;
+                    head += 1;
+                }
+                high => {
+                    let low = input.get(tail + 2).ok_or(DecodeError::UnexpectedEnd)?;
+                    let byte = hex_bytes_to_byte([*high, *low])?;
+                    input[head] = byte;
+                    tail += 3;
+                    head += 1;
+                }
+            }
+        } else if requires_escape(input[tail]) {
+            return Err(DecodeError::InvalidByte(input[tail]));
+        } else {
+            input[head] = input[tail];
+            tail += 1;
+            head += 1;
+        }
+    }
+
+    let decoded = &mut input[..head];
+    Ok(decoded)
+}
+
 /// Returns true if the given byte must be escaped with a backtick.
 ///
 /// The following ASCII bytes **do not** require escaping, and are left

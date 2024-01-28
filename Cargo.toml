@@ -19,9 +19,13 @@ divan = "0.1.11"
 proptest = "1.4.0"
 
 [[bench]]
-name = "encode"
+name = "decode_in_place"
 harness = false
 
 [[bench]]
 name = "decode"
+harness = false
+
+[[bench]]
+name = "encode"
 harness = false
