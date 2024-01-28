@@ -9,7 +9,7 @@ pub mod iter;
 extern crate alloc;
 
 #[cfg(feature = "alloc")]
-use alloc::borrow::Cow;
+use alloc::{borrow::Cow, string::String, vec::Vec};
 
 /// Encode the given input as a string, escaping any bytes that require it.
 /// If no bytes require escaping, then the result will be borrowed from
@@ -53,7 +53,7 @@ pub fn encode(input: &[u8]) -> Cow<str> {
 
             // SAFETY: We know the entire input is valid ASCII and UTF-8, and
             // additionally doesn't require any bytes to be escaped
-            Cow::Borrowed(unsafe { std::str::from_utf8_unchecked(input) })
+            Cow::Borrowed(unsafe { core::str::from_utf8_unchecked(input) })
         }
     }
 }
@@ -277,7 +277,7 @@ pub fn encode_to_vec(input: &[u8], output: &mut Vec<u8>) -> usize {
 /// ```
 /// let mut output = vec![];
 /// let count = tick_encoding::decode_to_vec(b"hello, world! `F0`9F`99`82", &mut output).unwrap();
-/// let output_str = std::str::from_utf8(&output).unwrap();
+/// let output_str = core::str::from_utf8(&output).unwrap();
 /// assert_eq!(output_str, "hello, world! 🙂");
 /// assert_eq!(count, 18);
 /// ```
