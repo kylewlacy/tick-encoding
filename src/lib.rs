@@ -1,5 +1,20 @@
+#![doc = include_str!("../README.md")]
+
 use std::borrow::Cow;
 
+/// Encode the given input as a string, escaping any bytes that require it.
+/// If no bytes require escaping, then the result will be borrowed from
+/// the input.
+///
+/// ## Example
+///
+/// ```
+/// let encoded = tick_encoding::encode(b"hello world!");
+/// assert_eq!(encoded, "hello world!");
+///
+/// let encoded = tick_encoding::encode(&[0x00, 0xFF]);
+/// assert_eq!(encoded, "`00`FF");
+/// ```
 pub fn encode(input: &[u8]) -> Cow<str> {
     // Get the first index that needs to be escaped
     let escape_index = input.iter().position(|byte| requires_escape(*byte));
@@ -32,6 +47,21 @@ pub fn encode(input: &[u8]) -> Cow<str> {
     }
 }
 
+/// Decode the given encoded input into a byte array. If no bytes need to
+/// be un-escapeed, then the result will be borrowed from the input.
+///
+/// Returns an error if the input isn't a valid ASCII string, or isn't a
+/// valid canonical tick-encoding.
+///
+/// ## Example
+///
+/// ```
+/// let decoded = tick_encoding::decode(b"hello world!").unwrap();
+/// assert_eq!(decoded, "hello world!".as_bytes());
+///
+/// let decoded = tick_encoding::decode(b"`00`FF").unwrap();
+/// assert_eq!(decoded, [0x00, 0xFF].as_slice());
+/// ```
 pub fn decode(input: &[u8]) -> Result<Cow<[u8]>, DecodeError> {
     // Get the first index that isn't already a valid unescaped byte
     let escape_index = input.iter().position(|byte| requires_escape(*byte));
@@ -53,6 +83,16 @@ pub fn decode(input: &[u8]) -> Result<Cow<[u8]>, DecodeError> {
     }
 }
 
+/// Returns true if the given byte must be escaped with a backtick.
+///
+/// The following ASCII bytes **do not** require escaping, and are left
+/// un-escaped in a tick-encoded string:
+///
+/// - Tab (`\t`, 0x09)
+/// - Newline (`\n`, 0x0A)
+/// - Carriage return (`\r`, 0x0D)
+/// - Space (` `, 0x20)
+/// - Printable characters except bactick (0x21 to 0x59, 0x61 to 0x7E)
 pub fn requires_escape(byte: u8) -> bool {
     match byte {
         b'`' => true,
@@ -61,6 +101,18 @@ pub fn requires_escape(byte: u8) -> bool {
     }
 }
 
+/// Encode the given input, and append the result to `output`. Returns
+/// the number of bytes / characters appended (only ASCII characters are
+/// appended).
+///
+/// ## Example
+///
+/// ```
+/// let mut output = String::new();
+/// let count = tick_encoding::encode_to_string("hello, world! 🙂".as_bytes(), &mut output);
+/// assert_eq!(output, "hello, world! `F0`9F`99`82");
+/// assert_eq!(count, 26);
+/// ```
 pub fn encode_to_string(input: &[u8], output: &mut String) -> usize {
     let mut written = 0;
     output.reserve(input.len());
@@ -84,6 +136,17 @@ pub fn encode_to_string(input: &[u8], output: &mut String) -> usize {
     written
 }
 
+/// Encode the given input, and append the result to `output`. Returns
+/// the number of bytes appended.
+///
+/// ## Example
+///
+/// ```
+/// let mut output = vec![];
+/// let count = tick_encoding::encode_to_vec("hello, world! 🙂".as_bytes(), &mut output);
+/// assert_eq!(output, b"hello, world! `F0`9F`99`82");
+/// assert_eq!(count, 26);
+/// ```
 pub fn encode_to_vec(input: &[u8], output: &mut Vec<u8>) -> usize {
     let mut written = 0;
     output.reserve(input.len());
@@ -105,6 +168,20 @@ pub fn encode_to_vec(input: &[u8], output: &mut Vec<u8>) -> usize {
     written
 }
 
+/// Decode the given tick-encoded ASCII input, and append the result to
+/// `output`. Returns the number of bytes appended. Returns an error
+/// if the result isn't a valid ASCII string, or isn't a valid canonical
+/// tick-encoding.
+///
+/// ## Example
+///
+/// ```
+/// let mut output = vec![];
+/// let count = tick_encoding::decode_to_vec(b"hello, world! `F0`9F`99`82", &mut output).unwrap();
+/// let output_str = std::str::from_utf8(&output).unwrap();
+/// assert_eq!(output_str, "hello, world! 🙂");
+/// assert_eq!(count, 18);
+/// ```
 pub fn decode_to_vec(input: &[u8], output: &mut Vec<u8>) -> Result<usize, DecodeError> {
     let mut written = 0;
     let mut iter = input.iter();
@@ -206,20 +283,33 @@ fn hex_bytes_to_byte([high, low]: [u8; 2]) -> Result<u8, DecodeError> {
     Ok(byte)
 }
 
+/// An error trying to decode a tick-encoded string.
 #[derive(Debug, thiserror::Error)]
 pub enum DecodeError {
+    /// Encountered an invalid byte in the string. This could either by a
+    /// non-ASCII byte or an ASCII byte that requires escaping (see
+    /// [requires_escape]).
     #[error("invalid encoded byte 0x{0:02x}")]
     InvalidByte(u8),
+    /// Reached the end of the string following a backtick (\`). A backtick
+    /// must be followed by either another backtick or a 2-digit hex value.
     #[error("unexpected end after `")]
     UnexpectedEnd,
+    /// Tried to decode a 2-digit hex value, but the value does not require
+    /// escaping (see [requires_escape]).
     #[error("unexpected escape {0}, expected {1}")]
     UnexpectedEscape(EscapedHex, char),
+    /// Tried to decode a 2-digit hex value, but the hex value contained
+    /// the values `[a-f]`. Escaped hex values must use `[A-F]`.
     #[error("expected uppercase hex sequence, found {0}")]
     LowercaseHex(EscapedHex),
+    /// Tried to decode a 2-digit hex value, but an invalid hex digit
+    /// was found. Escaped hex values must use the characters `[0-9A-F]`.
     #[error("invalid hex sequence {0}")]
     InvalidHex(EscapedHex),
 }
 
+/// A two-digit escaped hex sequence, prefixed with a backtick.
 #[derive(Debug)]
 pub struct EscapedHex(pub char, pub char);
 
