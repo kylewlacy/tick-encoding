@@ -132,4 +132,24 @@ proptest! {
         let decoded = tick_encoding::decode_in_place(&mut buffer).unwrap();
         assert_eq!(decoded, bytes);
     }
+
+    #[test]
+    fn encode_iter(bytes in any::<Vec<u8>>()) {
+        let encoded = tick_encoding::encode(&bytes);
+
+        let encode_iter = tick_encoding::encode_iter(bytes.iter().copied());
+        let iter_encoded = encode_iter.collect::<String>();
+
+        assert_eq!(encoded, iter_encoded);
+    }
+
+    #[test]
+    fn decode_iter(bytes in any::<Vec<u8>>()) {
+        let encoded = tick_encoding::encode(&bytes);
+
+        let decode_iter = tick_encoding::decode_iter(encoded.bytes());
+        let iter_decoded = decode_iter.collect::<Result<Vec<u8>, tick_encoding::DecodeError>>().unwrap();
+
+        assert_eq!(bytes, iter_decoded);
+    }
 }

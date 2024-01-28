@@ -2,6 +2,10 @@
 
 use std::borrow::Cow;
 
+pub(crate) mod decoder;
+pub(crate) mod encoder;
+pub mod iter;
+
 /// Encode the given input as a string, escaping any bytes that require it.
 /// If no bytes require escaping, then the result will be borrowed from
 /// the input.
@@ -47,6 +51,21 @@ pub fn encode(input: &[u8]) -> Cow<str> {
     }
 }
 
+/// Return an iterator that encodes the bytes from the input iterator.
+///
+/// ## Example
+///
+/// ```
+/// let iter = tick_encoding::encode_iter(b"x: \x00".iter().copied());
+/// assert_eq!(iter.collect::<String>(), "x: `00");
+/// ```
+pub fn encode_iter<I>(iter: I) -> iter::EncodeIter<I::IntoIter>
+where
+    I: IntoIterator<Item = u8>,
+{
+    iter::EncodeIter::new(iter.into_iter())
+}
+
 /// Decode the given encoded input into a byte array. If no bytes need to
 /// be un-escapeed, then the result will be borrowed from the input.
 ///
@@ -81,6 +100,23 @@ pub fn decode(input: &[u8]) -> Result<Cow<[u8]>, DecodeError> {
         }
         None => Ok(Cow::Borrowed(input)),
     }
+}
+
+/// Return an iterator that decodes the tick-encoded characters from the input
+/// iterator. Returns `Some(Err(_))` if the input character sequence is invalid,
+/// then returns `None` after that.
+///
+/// ## Example
+///
+/// ```
+/// let iter = tick_encoding::decode_iter(b"`00`01".iter().copied());
+/// assert_eq!(iter.collect::<Result<Vec<_>, _>>().unwrap(), vec![0x00, 0x01]);
+/// ```
+pub fn decode_iter<I>(iter: I) -> iter::DecodeIter<I::IntoIter>
+where
+    I: IntoIterator<Item = u8>,
+{
+    iter::DecodeIter::new(iter.into_iter())
 }
 
 /// Take a byte slice containing a tick-encoded ASCII string, and decode it
