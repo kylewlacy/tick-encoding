@@ -26,8 +26,12 @@ jobs:
           - beta
         features:
           - "default"
+          - "default safe"
           - "std"
+          - "std safe"
           - "alloc"
+          - "alloc safe"
+          - "safe"
           - "none"
     name: Run tests (${{ matrix.toolchain }}, ${{ matrix.features }})
     runs-on: ubuntu-22.04

@@ -1,3 +1,4 @@
+#![cfg_attr(feature = "safe", deny(unsafe_code))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(feature = "std", doc = include_str!("../README.md"))]
 
@@ -38,7 +39,7 @@ pub fn encode(input: &[u8]) -> Cow<str> {
 
             // SAFETY: We know the input up to this point is valid ASCII and
             // UTF-8, since nothing up to this point needs escaping
-            let validated = unsafe { core::str::from_utf8_unchecked(validated) };
+            let validated = from_utf8_unchecked_potentially_unsafe(validated);
 
             let mut output = String::with_capacity(input.len() + 1);
             output.push_str(validated);
@@ -53,7 +54,7 @@ pub fn encode(input: &[u8]) -> Cow<str> {
 
             // SAFETY: We know the entire input is valid ASCII and UTF-8, and
             // additionally doesn't require any bytes to be escaped
-            Cow::Borrowed(unsafe { core::str::from_utf8_unchecked(input) })
+            Cow::Borrowed(from_utf8_unchecked_potentially_unsafe(input))
         }
     }
 }
@@ -375,6 +376,17 @@ fn hex_bytes_to_byte([high, low]: [u8; 2]) -> Result<u8, DecodeError> {
     }
 
     Ok(byte)
+}
+
+#[cfg(feature = "safe")]
+fn from_utf8_unchecked_potentially_unsafe(bytes: &[u8]) -> &str {
+    core::str::from_utf8(bytes).unwrap()
+}
+
+#[cfg(not(feature = "safe"))]
+fn from_utf8_unchecked_potentially_unsafe(bytes: &[u8]) -> &str {
+    debug_assert!(bytes.is_ascii());
+    unsafe { core::str::from_utf8_unchecked(bytes) }
 }
 
 /// An error trying to decode a tick-encoded string.
