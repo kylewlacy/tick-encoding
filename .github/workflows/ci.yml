@@ -40,17 +40,25 @@ jobs:
         run: rustup toolchain install "$TOOLCHAIN"
       - name: Run tests
         run: |
-          case "$FEATURES" in
-            "default" )
-              feature_flags=()
-              ;;
-            "none" )
-              feature_flags=("--no-default-features")
-              ;;
-            * )
-              feature_flags=("--no-default-features" "--features" "$FEATURES")
-              ;;
-          esac
+          use_default_features=0
+          feature_flags=()
+          for feature in $FEATURES; do
+            case "$feature" in
+              "default" )
+                use_default_features=1
+                ;;
+              "none" )
+                ;;
+              * )
+                feature_flags+=(--features "$feature")
+                ;;
+            esac
+          done
+
+          if [ "$use_default_features" -eq 0 ]; then
+            feature_flags+=(--no-default-features)
+          fi
+
           cargo +"$TOOLCHAIN" test "${feature_flags[@]}"
 
         env:
