@@ -35,6 +35,14 @@ jobs:
         run: rustup toolchain install "$TOOLCHAIN"
       - name: Run tests
         run: cargo +"$TOOLCHAIN" test
+  benchmark:
+    name: Run benchmarks
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run benchmarks
+        run: cargo bench
   miri:
     name: Run Miri tests
     runs-on: ubuntu-22.04
