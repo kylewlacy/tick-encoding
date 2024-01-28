@@ -148,6 +148,14 @@ pub fn decode_in_place(input: &mut [u8]) -> Result<&mut [u8], DecodeError> {
         return Ok(input);
     };
 
+    // Walk through the rest of the input. The bytes between `0..head` have been
+    // decoded, and the bytes between `tail..input.len()` are still encoded.
+    // Since the encoded form is always as long as the decoded form or longer,
+    // `head` will always be less than or equal to `tail`.
+    //
+    // This technique is very similar to the one from `in-place-string-map` (see
+    // https://crates.io/crates/in-place-string-map), but works on a byte slice
+    // instead.
     let mut head = escape_index;
     let mut tail = escape_index;
     while tail < input.len() {
