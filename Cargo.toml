@@ -7,7 +7,7 @@ rust-version = "1.70.0"
 authors = ["Kyle Lacy <rust@kyle.space>"]
 repository = "https://github.com/kylewlacy/tick-encoding"
 license = "MIT OR Unlicense"
-categories = ["encoding"]
+categories = ["encoding", "no-std", "no-std::no-alloc"]
 keywords = ["bytes", "binary", "encoding", "percent"]
 
 [features]
