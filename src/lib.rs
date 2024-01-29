@@ -399,34 +399,28 @@ fn from_utf8_unchecked_potentially_unsafe(bytes: &[u8]) -> &str {
 
 /// An error trying to decode a tick-encoded string.
 #[derive(Debug)]
-#[cfg_attr(feature = "dep:thiserror", derive(thiserror::Error))]
+#[cfg_attr(feature = "std", derive(thiserror::Error))]
 pub enum DecodeError {
     /// Encountered an invalid byte in the string. This could either by a
     /// non-ASCII byte or an ASCII byte that requires escaping (see
     /// [requires_escape]).
-    #[cfg_attr(feature = "dep:thiserror", error("invalid encoded byte 0x{0:02x}"))]
+    #[cfg_attr(feature = "std", error("invalid encoded byte 0x{0:02x}"))]
     InvalidByte(u8),
     /// Reached the end of the string following a backtick (\`). A backtick
     /// must be followed by either another backtick or a 2-digit hex value.
-    #[cfg_attr(feature = "dep:thiserror", error("unexpected end after `"))]
+    #[cfg_attr(feature = "std", error("unexpected end after `"))]
     UnexpectedEnd,
     /// Tried to decode a 2-digit hex value, but the value does not require
     /// escaping (see [requires_escape]).
-    #[cfg_attr(
-        feature = "dep:thiserror",
-        error("unexpected escape {0}, expected {1}")
-    )]
+    #[cfg_attr(feature = "std", error("unexpected escape {0}, expected {1}"))]
     UnexpectedEscape(EscapedHex, char),
     /// Tried to decode a 2-digit hex value, but the hex value contained
     /// the values `[a-f]`. Escaped hex values must use `[A-F]`.
-    #[cfg_attr(
-        feature = "dep:thiserror",
-        error("expected uppercase hex sequence, found {0}")
-    )]
+    #[cfg_attr(feature = "std", error("expected uppercase hex sequence, found {0}"))]
     LowercaseHex(EscapedHex),
     /// Tried to decode a 2-digit hex value, but an invalid hex digit
     /// was found. Escaped hex values must use the characters `[0-9A-F]`.
-    #[cfg_attr(feature = "dep:thiserror", error("invalid hex sequence {0}"))]
+    #[cfg_attr(feature = "std", error("invalid hex sequence {0}"))]
     InvalidHex(EscapedHex),
 }
 

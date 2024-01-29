@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Implement [`std::error::Error`](https://doc.rust-lang.org/stable/std/error/trait.Error.html) for `tick_encoding::DecodeError`.
+    - This was always intended to be in-place, but was unavailable in previous versions due to a mistake in a `#[cfg_attr(...)]` attribute.
+
 ## [v0.1.1] - 2024-01-28
 
 ### Fixed
