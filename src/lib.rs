@@ -346,22 +346,22 @@ fn byte_to_hex_chars(byte: u8) -> [char; 2] {
 fn hex_bytes_to_byte([high, low]: [u8; 2]) -> Result<u8, DecodeError> {
     enum HexCharResult {
         Valid(u8),
-        Lowercase(char),
-        Invalid(char),
+        Lowercase(()),
+        Invalid(()),
     }
 
     let high_value = match high {
         b'0'..=b'9' => HexCharResult::Valid(high - b'0'),
         b'A'..=b'F' => HexCharResult::Valid(high - b'A' + 10),
-        b'a'..=b'f' => HexCharResult::Lowercase(high as char),
-        _ => HexCharResult::Invalid(high as char),
+        b'a'..=b'f' => HexCharResult::Lowercase(()),
+        _ => HexCharResult::Invalid(()),
     };
 
     let low_value = match low {
         b'0'..=b'9' => HexCharResult::Valid(low - b'0'),
         b'A'..=b'F' => HexCharResult::Valid(low - b'A' + 10),
-        b'a'..=b'f' => HexCharResult::Lowercase(low as char),
-        _ => HexCharResult::Invalid(low as char),
+        b'a'..=b'f' => HexCharResult::Lowercase(()),
+        _ => HexCharResult::Invalid(()),
     };
 
     let byte = match (high_value, low_value) {
