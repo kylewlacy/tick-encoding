@@ -197,7 +197,7 @@ pub fn decode_in_place(input: &mut [u8]) -> Result<&mut [u8], DecodeError> {
 /// - Newline (`\n`, 0x0A)
 /// - Carriage return (`\r`, 0x0D)
 /// - Space (` `, 0x20)
-/// - Printable characters except bactick (0x21 to 0x59, 0x61 to 0x7E)
+/// - Printable characters except backtick (0x21 to 0x59, 0x61 to 0x7E)
 pub fn requires_escape(byte: u8) -> bool {
     match byte {
         b'`' => true,
