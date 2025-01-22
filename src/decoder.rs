@@ -6,7 +6,7 @@ pub enum Decoder {
     Ready,
     Finished,
     Tick,
-    TickHalfHex([u8; 1]),
+    TickHalfHex(u8),
 }
 
 impl Decoder {
@@ -33,7 +33,7 @@ impl Decoder {
                     *self = Self::Ready;
                     DecodeStatus::Emit(Some(Ok(b'`')))
                 } else {
-                    *self = Self::TickHalfHex([input]);
+                    *self = Self::TickHalfHex(input);
                     DecodeStatus::NeedMore
                 }
             }
@@ -41,7 +41,7 @@ impl Decoder {
                 *self = Self::Finished;
                 DecodeStatus::Emit(Some(Err(DecodeError::UnexpectedEnd)))
             }
-            (Self::TickHalfHex([high]), Some(low)) => {
+            (Self::TickHalfHex(high), Some(low)) => {
                 let byte_result = hex_bytes_to_byte([high, low]);
                 match byte_result {
                     Ok(byte) => {
@@ -54,7 +54,7 @@ impl Decoder {
                     }
                 }
             }
-            (Self::TickHalfHex([_]), None) => {
+            (Self::TickHalfHex(_), None) => {
                 *self = Self::Finished;
                 DecodeStatus::Emit(Some(Err(DecodeError::UnexpectedEnd)))
             }
