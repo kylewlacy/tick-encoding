@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Upgrade `thiserror` dependency to `v2.0.11` ([#1](https://github.com/kylewlacy/tick-encoding/pull/1) by [@jaudiger](https://github.com/jaudiger))
+
 ## [v0.1.2] - 2024-01-28
 
 ### Changed
