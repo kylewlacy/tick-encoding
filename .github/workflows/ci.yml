@@ -2,6 +2,7 @@ name: CI
 
 on:
   - push
+  - pull_request
 
 env:
   NIGHTLY_TOOLCHAIN: nightly-2024-01-27
@@ -105,7 +106,7 @@ jobs:
         uses: obi1kenobi/cargo-semver-checks-action@v2
   publish:
     name: Publish crate
-    if: github.repository == 'kylewlacy/tick-encoding' && startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'push' && github.repository == 'kylewlacy/tick-encoding' && startsWith(github.ref, 'refs/tags/v')
     needs: [check, test, benchmark, miri, check-semver]
     runs-on: ubuntu-22.04
     steps:
