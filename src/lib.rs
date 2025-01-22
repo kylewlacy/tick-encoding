@@ -346,32 +346,32 @@ fn byte_to_hex_chars(byte: u8) -> [char; 2] {
 fn hex_bytes_to_byte([high, low]: [u8; 2]) -> Result<u8, DecodeError> {
     enum HexCharResult {
         Valid(u8),
-        Lowercase(()),
-        Invalid(()),
+        Lowercase,
+        Invalid,
     }
 
     let high_value = match high {
         b'0'..=b'9' => HexCharResult::Valid(high - b'0'),
         b'A'..=b'F' => HexCharResult::Valid(high - b'A' + 10),
-        b'a'..=b'f' => HexCharResult::Lowercase(()),
-        _ => HexCharResult::Invalid(()),
+        b'a'..=b'f' => HexCharResult::Lowercase,
+        _ => HexCharResult::Invalid,
     };
 
     let low_value = match low {
         b'0'..=b'9' => HexCharResult::Valid(low - b'0'),
         b'A'..=b'F' => HexCharResult::Valid(low - b'A' + 10),
-        b'a'..=b'f' => HexCharResult::Lowercase(()),
-        _ => HexCharResult::Invalid(()),
+        b'a'..=b'f' => HexCharResult::Lowercase,
+        _ => HexCharResult::Invalid,
     };
 
     let byte = match (high_value, low_value) {
         (HexCharResult::Valid(high_value), HexCharResult::Valid(low_value)) => {
             (high_value << 4) | low_value
         }
-        (HexCharResult::Invalid(_), _) | (_, HexCharResult::Invalid(_)) => {
+        (HexCharResult::Invalid, _) | (_, HexCharResult::Invalid) => {
             return Err(DecodeError::InvalidHex(EscapedHex(high, low)));
         }
-        (HexCharResult::Lowercase(_), _) | (_, HexCharResult::Lowercase(_)) => {
+        (HexCharResult::Lowercase, _) | (_, HexCharResult::Lowercase) => {
             return Err(DecodeError::LowercaseHex(EscapedHex(high, low)));
         }
     };
