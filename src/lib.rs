@@ -448,7 +448,7 @@ impl core::fmt::Display for EscapedHex {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let Self(high, low) = self;
         if requires_escape(*high) || requires_escape(*low) {
-            write!(f, "0x{:02X} 0x{:02X}", high, low)
+            write!(f, "0x{high:02X} 0x{low:02X}")
         } else {
             write!(f, "`{}{}", *high as char, *low as char)
         }
