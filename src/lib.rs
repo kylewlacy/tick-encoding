@@ -197,7 +197,7 @@ pub fn decode_in_place(input: &mut [u8]) -> Result<&mut [u8], DecodeError> {
 /// - Newline (`\n`, 0x0A)
 /// - Carriage return (`\r`, 0x0D)
 /// - Space (` `, 0x20)
-/// - Printable characters except bactick (0x21 to 0x59, 0x61 to 0x7E)
+/// - Printable characters except backtick (0x21 to 0x59, 0x61 to 0x7E)
 pub fn requires_escape(byte: u8) -> bool {
     match byte {
         b'`' => true,
@@ -346,22 +346,22 @@ fn byte_to_hex_chars(byte: u8) -> [char; 2] {
 fn hex_bytes_to_byte([high, low]: [u8; 2]) -> Result<u8, DecodeError> {
     enum HexCharResult {
         Valid(u8),
-        Lowercase(char),
-        Invalid(char),
+        Lowercase(()),
+        Invalid(()),
     }
 
     let high_value = match high {
         b'0'..=b'9' => HexCharResult::Valid(high - b'0'),
         b'A'..=b'F' => HexCharResult::Valid(high - b'A' + 10),
-        b'a'..=b'f' => HexCharResult::Lowercase(high as char),
-        _ => HexCharResult::Invalid(high as char),
+        b'a'..=b'f' => HexCharResult::Lowercase(()),
+        _ => HexCharResult::Invalid(()),
     };
 
     let low_value = match low {
         b'0'..=b'9' => HexCharResult::Valid(low - b'0'),
         b'A'..=b'F' => HexCharResult::Valid(low - b'A' + 10),
-        b'a'..=b'f' => HexCharResult::Lowercase(low as char),
-        _ => HexCharResult::Invalid(low as char),
+        b'a'..=b'f' => HexCharResult::Lowercase(()),
+        _ => HexCharResult::Invalid(()),
     };
 
     let byte = match (high_value, low_value) {
