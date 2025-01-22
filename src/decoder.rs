@@ -42,7 +42,7 @@ impl Decoder {
                 DecodeStatus::Emit(Some(Err(DecodeError::UnexpectedEnd)))
             }
             (Self::TickHalfHex(high), Some(low)) => {
-                let byte_result = hex_bytes_to_byte([high, low]);
+                let byte_result = hex_bytes_to_byte(high, low);
                 match byte_result {
                     Ok(byte) => {
                         *self = Self::Ready;

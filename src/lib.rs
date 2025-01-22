@@ -169,7 +169,7 @@ pub fn decode_in_place(input: &mut [u8]) -> Result<&mut [u8], DecodeError> {
                 }
                 high => {
                     let low = input.get(tail + 2).ok_or(DecodeError::UnexpectedEnd)?;
-                    let byte = hex_bytes_to_byte([*high, *low])?;
+                    let byte = hex_bytes_to_byte(*high, *low)?;
                     input[head] = byte;
                     tail += 3;
                     head += 1;
@@ -304,7 +304,7 @@ pub fn decode_to_vec(input: &[u8], output: &mut Vec<u8>) -> Result<usize, Decode
                 }
                 high => {
                     let low = iter.next().ok_or(DecodeError::UnexpectedEnd)?;
-                    let byte = hex_bytes_to_byte([*high, *low])?;
+                    let byte = hex_bytes_to_byte(*high, *low)?;
                     output.push(byte);
                     written += 1;
                 }
@@ -343,7 +343,7 @@ fn byte_to_hex_chars(byte: u8) -> [char; 2] {
     [high_byte as char, low_byte as char]
 }
 
-fn hex_bytes_to_byte([high, low]: [u8; 2]) -> Result<u8, DecodeError> {
+fn hex_bytes_to_byte(high: u8, low: u8) -> Result<u8, DecodeError> {
     enum HexCharResult {
         Valid(u8),
         Lowercase,
