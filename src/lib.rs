@@ -223,19 +223,19 @@ pub fn requires_escape(byte: u8) -> bool {
 pub fn encode_to_string(input: &[u8], output: &mut String) -> usize {
     let mut written = 0;
     output.reserve(input.len());
-    for byte in input {
-        if *byte == b'`' {
+    for &byte in input {
+        if byte == b'`' {
             output.push_str("``");
             written += 2;
-        } else if requires_escape(*byte) {
-            let [high, low] = byte_to_hex_chars(*byte);
+        } else if requires_escape(byte) {
+            let [high, low] = byte_to_hex_chars(byte);
             output.push('`');
             output.push(high);
             output.push(low);
 
             written += 3;
         } else {
-            output.push(*byte as char);
+            output.push(byte as char);
             written += 1;
         }
     }
@@ -258,17 +258,17 @@ pub fn encode_to_string(input: &[u8], output: &mut String) -> usize {
 pub fn encode_to_vec(input: &[u8], output: &mut Vec<u8>) -> usize {
     let mut written = 0;
     output.reserve(input.len());
-    for byte in input {
-        if *byte == b'`' {
+    for &byte in input {
+        if byte == b'`' {
             output.extend_from_slice(b"``");
             written += 2;
-        } else if requires_escape(*byte) {
-            let [high, low] = byte_to_hex_bytes(*byte);
+        } else if requires_escape(byte) {
+            let [high, low] = byte_to_hex_bytes(byte);
             output.extend_from_slice(&[b'`', high, low]);
 
             written += 3;
         } else {
-            output.push(*byte);
+            output.push(byte);
             written += 1;
         }
     }
@@ -294,8 +294,8 @@ pub fn encode_to_vec(input: &[u8], output: &mut Vec<u8>) -> usize {
 pub fn decode_to_vec(input: &[u8], output: &mut Vec<u8>) -> Result<usize, DecodeError> {
     let mut written = 0;
     let mut iter = input.iter();
-    while let Some(byte) = iter.next() {
-        if *byte == b'`' {
+    while let Some(&byte) = iter.next() {
+        if byte == b'`' {
             let escaped = iter.next().ok_or(DecodeError::UnexpectedEnd)?;
             match escaped {
                 b'`' => {
@@ -309,10 +309,10 @@ pub fn decode_to_vec(input: &[u8], output: &mut Vec<u8>) -> Result<usize, Decode
                     written += 1;
                 }
             }
-        } else if requires_escape(*byte) {
-            return Err(DecodeError::InvalidByte(*byte));
+        } else if requires_escape(byte) {
+            return Err(DecodeError::InvalidByte(byte));
         } else {
-            output.push(*byte);
+            output.push(byte);
             written += 1;
         }
     }
