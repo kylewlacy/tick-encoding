@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [v0.1.3] - 2025-01-22
+
 ### Changed
 
 - Upgrade `thiserror` dependency to `v2.0.11` ([#1](https://github.com/kylewlacy/tick-encoding/pull/1) by [@jaudiger](https://github.com/jaudiger))
@@ -26,7 +28,8 @@
 
 - Initial release!
 
-[Unreleased]: https://github.com/kylewlacy/tick-encoding/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/kylewlacy/tick-encoding/compare/v0.1.3...HEAD
+[v0.1.2]: https://github.com/kylewlacy/tick-encoding/releases/tag/v0.1.3
 [v0.1.2]: https://github.com/kylewlacy/tick-encoding/releases/tag/v0.1.2
 [v0.1.1]: https://github.com/kylewlacy/tick-encoding/releases/tag/v0.1.1
 [v0.1.0]: https://github.com/kylewlacy/tick-encoding/releases/tag/v0.1.0
