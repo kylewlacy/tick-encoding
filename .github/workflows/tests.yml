@@ -1,8 +1,11 @@
-name: CI
+name: Tests
 
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - "*"
+  pull_request:
+  workflow_call:
 
 env:
   NIGHTLY_TOOLCHAIN: nightly-2024-01-27
