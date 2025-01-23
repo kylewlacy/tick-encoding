@@ -2,7 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
 - Upgrade `thiserror` dependency to `v2.0.11` ([#1](https://github.com/kylewlacy/tick-encoding/pull/1) by [@jaudiger](https://github.com/jaudiger))
+- Make `requires_escape` into a `const fn` ([#2](https://github.com/kylewlacy/tick-encoding/pull/2) by [@jaudiger](https://github.com/jaudiger))
 
 ## [v0.1.2] - 2024-01-28
 
