@@ -169,7 +169,7 @@ pub fn decode_in_place(input: &mut [u8]) -> Result<&mut [u8], DecodeError> {
                 }
                 high => {
                     let low = input.get(tail + 2).ok_or(DecodeError::UnexpectedEnd)?;
-                    let byte = hex_bytes_to_byte([*high, *low])?;
+                    let byte = hex_bytes_to_byte(*high, *low)?;
                     input[head] = byte;
                     tail += 3;
                     head += 1;
@@ -223,19 +223,19 @@ pub fn requires_escape(byte: u8) -> bool {
 pub fn encode_to_string(input: &[u8], output: &mut String) -> usize {
     let mut written = 0;
     output.reserve(input.len());
-    for byte in input {
-        if *byte == b'`' {
+    for &byte in input {
+        if byte == b'`' {
             output.push_str("``");
             written += 2;
-        } else if requires_escape(*byte) {
-            let [high, low] = byte_to_hex_chars(*byte);
+        } else if requires_escape(byte) {
+            let [high, low] = byte_to_hex_chars(byte);
             output.push('`');
             output.push(high);
             output.push(low);
 
             written += 3;
         } else {
-            output.push(*byte as char);
+            output.push(byte as char);
             written += 1;
         }
     }
@@ -258,17 +258,17 @@ pub fn encode_to_string(input: &[u8], output: &mut String) -> usize {
 pub fn encode_to_vec(input: &[u8], output: &mut Vec<u8>) -> usize {
     let mut written = 0;
     output.reserve(input.len());
-    for byte in input {
-        if *byte == b'`' {
+    for &byte in input {
+        if byte == b'`' {
             output.extend_from_slice(b"``");
             written += 2;
-        } else if requires_escape(*byte) {
-            let [high, low] = byte_to_hex_bytes(*byte);
+        } else if requires_escape(byte) {
+            let [high, low] = byte_to_hex_bytes(byte);
             output.extend_from_slice(&[b'`', high, low]);
 
             written += 3;
         } else {
-            output.push(*byte);
+            output.push(byte);
             written += 1;
         }
     }
@@ -294,8 +294,8 @@ pub fn encode_to_vec(input: &[u8], output: &mut Vec<u8>) -> usize {
 pub fn decode_to_vec(input: &[u8], output: &mut Vec<u8>) -> Result<usize, DecodeError> {
     let mut written = 0;
     let mut iter = input.iter();
-    while let Some(byte) = iter.next() {
-        if *byte == b'`' {
+    while let Some(&byte) = iter.next() {
+        if byte == b'`' {
             let escaped = iter.next().ok_or(DecodeError::UnexpectedEnd)?;
             match escaped {
                 b'`' => {
@@ -304,15 +304,15 @@ pub fn decode_to_vec(input: &[u8], output: &mut Vec<u8>) -> Result<usize, Decode
                 }
                 high => {
                     let low = iter.next().ok_or(DecodeError::UnexpectedEnd)?;
-                    let byte = hex_bytes_to_byte([*high, *low])?;
+                    let byte = hex_bytes_to_byte(*high, *low)?;
                     output.push(byte);
                     written += 1;
                 }
             }
-        } else if requires_escape(*byte) {
-            return Err(DecodeError::InvalidByte(*byte));
+        } else if requires_escape(byte) {
+            return Err(DecodeError::InvalidByte(byte));
         } else {
-            output.push(*byte);
+            output.push(byte);
             written += 1;
         }
     }
@@ -343,7 +343,7 @@ fn byte_to_hex_chars(byte: u8) -> [char; 2] {
     [high_byte as char, low_byte as char]
 }
 
-fn hex_bytes_to_byte([high, low]: [u8; 2]) -> Result<u8, DecodeError> {
+fn hex_bytes_to_byte(high: u8, low: u8) -> Result<u8, DecodeError> {
     enum HexCharResult {
         Valid(u8),
         Lowercase,
