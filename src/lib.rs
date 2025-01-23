@@ -403,7 +403,7 @@ fn from_utf8_unchecked_potentially_unsafe(bytes: &[u8]) -> &str {
 pub enum DecodeError {
     /// Encountered an invalid byte in the string. This could either by a
     /// non-ASCII byte or an ASCII byte that requires escaping (see
-    /// [requires_escape]).
+    /// [`requires_escape`]).
     #[cfg_attr(feature = "std", error("invalid encoded byte 0x{0:02x}"))]
     InvalidByte(u8),
     /// Reached the end of the string following a backtick (\`). A backtick
@@ -411,7 +411,7 @@ pub enum DecodeError {
     #[cfg_attr(feature = "std", error("unexpected end after `"))]
     UnexpectedEnd,
     /// Tried to decode a 2-digit hex value, but the value does not require
-    /// escaping (see [requires_escape]).
+    /// escaping (see [`requires_escape`]).
     #[cfg_attr(feature = "std", error("unexpected escape {0}, expected {1}"))]
     UnexpectedEscape(EscapedHex, char),
     /// Tried to decode a 2-digit hex value, but the hex value contained
@@ -448,7 +448,7 @@ impl core::fmt::Display for EscapedHex {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let Self(high, low) = self;
         if requires_escape(*high) || requires_escape(*low) {
-            write!(f, "0x{:02X} 0x{:02X}", high, low)
+            write!(f, "0x{high:02X} 0x{low:02X}")
         } else {
             write!(f, "`{}{}", *high as char, *low as char)
         }
