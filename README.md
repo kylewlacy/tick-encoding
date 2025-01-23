@@ -1,7 +1,7 @@
 [![Crates.io](https://img.shields.io/crates/v/tick-encoding)](https://crates.io/crates/tick-encoding)
 [![docs.rs](https://img.shields.io/docsrs/tick-encoding)](https://docs.rs/tick-encoding/)
 [![Minimum Supported Rust Version](https://img.shields.io/crates/msrv/tick-encoding)](https://crates.io/crates/tick-encoding)
-[![Tests](https://img.shields.io/github/actions/workflow/status/kylewlacy/tick-encoding/.github%2Fworkflows%2Fci.yml?label=tests)
+[![Tests](https://img.shields.io/github/actions/workflow/status/kylewlacy/tick-encoding/.github%2Fworkflows%2Ftests.yml)
 ](https://github.com/kylewlacy/tick-encoding/actions/workflows/ci.yml)
 
 Tick Encoding is a simple encoding scheme that encodes arbitrary binary data into an ASCII string, implemented as a Rust crate. It's primarily designed for stuffing usually-ASCII data into JSON strings. It's very similar to percent encoding / URL encoding, but with a few key differences:
