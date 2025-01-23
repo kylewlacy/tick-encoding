@@ -198,7 +198,7 @@ pub fn decode_in_place(input: &mut [u8]) -> Result<&mut [u8], DecodeError> {
 /// - Carriage return (`\r`, 0x0D)
 /// - Space (` `, 0x20)
 /// - Printable characters except backtick (0x21 to 0x59, 0x61 to 0x7E)
-pub fn requires_escape(byte: u8) -> bool {
+pub const fn requires_escape(byte: u8) -> bool {
     match byte {
         b'`' => true,
         b'\t' | b'\n' | b'\r' | b' '..=b'~' => false,
@@ -320,7 +320,7 @@ pub fn decode_to_vec(input: &[u8], output: &mut Vec<u8>) -> Result<usize, Decode
     Ok(written)
 }
 
-fn byte_to_hex_bytes(byte: u8) -> [u8; 2] {
+const fn byte_to_hex_bytes(byte: u8) -> [u8; 2] {
     let high = byte >> 4;
     let low = byte & 0x0F;
 
@@ -338,12 +338,12 @@ fn byte_to_hex_bytes(byte: u8) -> [u8; 2] {
     [high_byte, low_byte]
 }
 
-fn byte_to_hex_chars(byte: u8) -> [char; 2] {
+const fn byte_to_hex_chars(byte: u8) -> [char; 2] {
     let [high_byte, low_byte] = byte_to_hex_bytes(byte);
     [high_byte as char, low_byte as char]
 }
 
-fn hex_bytes_to_byte(high: u8, low: u8) -> Result<u8, DecodeError> {
+const fn hex_bytes_to_byte(high: u8, low: u8) -> Result<u8, DecodeError> {
     enum HexCharResult {
         Valid(u8),
         Lowercase,
