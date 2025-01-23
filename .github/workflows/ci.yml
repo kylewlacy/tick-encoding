@@ -94,10 +94,16 @@ jobs:
           PROPTEST_CASES: "16"
           PROPTEST_DISABLE_FAILURE_PERSISTENCE: "true"
           MIRIFLAGS: "-Zmiri-env-forward=PROPTEST_DISABLE_FAILURE_PERSISTENCE -Zmiri-env-forward=PROPTEST_CASES"
+  tests-passed:
+    name: All tests passed
+    needs: [check, test, benchmark, miri]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: "echo 'All tests passed'"
   check-semver:
     name: Check crate semver
     if: github.repository == 'kylewlacy/tick-encoding' && startsWith(github.ref, 'refs/tags/v')
-    needs: [check, test, benchmark, miri]
+    needs: [tests-passed]
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -107,7 +113,7 @@ jobs:
   publish:
     name: Publish crate
     if: github.event_name == 'push' && github.repository == 'kylewlacy/tick-encoding' && startsWith(github.ref, 'refs/tags/v')
-    needs: [check, test, benchmark, miri, check-semver]
+    needs: [tests-passed, check-semver]
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
