@@ -35,3 +35,11 @@ harness = false
 [[bench]]
 name = "encode"
 harness = false
+
+[[bench]]
+name = "iter"
+harness = false
+
+[[bench]]
+name = "functions"
+harness = false
