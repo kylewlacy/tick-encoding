@@ -12,6 +12,66 @@ extern crate alloc;
 #[cfg(feature = "alloc")]
 use alloc::{borrow::Cow, string::String, vec::Vec};
 
+/// Lookup table for knowing if a byte requires escaping.
+const REQUIRES_ESCAPE_TABLE: [bool; 256] = {
+    let mut table = [true; 256]; // Default: requires escape
+
+    // Whitespace that doesn't require escaping
+    table[b'\t' as usize] = false;
+    table[b'\n' as usize] = false;
+    table[b'\r' as usize] = false;
+
+    // Printable ASCII (space through tilde) except backtick
+    let mut i = b' ';
+    while i <= b'~' {
+        if i != b'`' {
+            table[i as usize] = false;
+        }
+        i += 1;
+    }
+
+    table
+};
+
+/// Lookup table for nibble to uppercase hex ASCII character.
+const HEX_NIBBLE_ENCODE_TABLE: [u8; 16] = *b"0123456789ABCDEF";
+
+const HEX_NIBBLE_DECODE_INVALID_ERR: u8 = 0xFF;
+const HEX_NIBBLE_DECODE_LOWERCASE_ERR: u8 = 0xFE;
+
+/// Lookup table for hex ASCII character to nibble.
+///
+/// Values:
+/// - 0x00-0x0F: Valid uppercase hex digit
+/// - `HEX_LOWERCASE`: Lowercase hex digit (a-f)
+/// - `HEX_INVALID`: Invalid character
+const HEX_NIBBLE_DECODE_TABLE: [u8; 256] = {
+    let mut table = [HEX_NIBBLE_DECODE_INVALID_ERR; 256];
+
+    // Digits '0'-'9' -> 0-9
+    let mut i = b'0';
+    while i <= b'9' {
+        table[i as usize] = i - b'0';
+        i += 1;
+    }
+
+    // Uppercase 'A'-'F' -> 10-15
+    i = b'A';
+    while i <= b'F' {
+        table[i as usize] = i - b'A' + 10;
+        i += 1;
+    }
+
+    // Lowercase 'a'-'f' -> lowercase error
+    i = b'a';
+    while i <= b'f' {
+        table[i as usize] = HEX_NIBBLE_DECODE_LOWERCASE_ERR;
+        i += 1;
+    }
+
+    table
+};
+
 /// Encode the given input as a string, escaping any bytes that require it.
 /// If no bytes require escaping, then the result will be borrowed from
 /// the input.
@@ -199,11 +259,7 @@ pub fn decode_in_place(input: &mut [u8]) -> Result<&mut [u8], DecodeError> {
 /// - Space (` `, 0x20)
 /// - Printable characters except backtick (0x21 to 0x59, 0x61 to 0x7E)
 pub const fn requires_escape(byte: u8) -> bool {
-    match byte {
-        b'`' => true,
-        b'\t' | b'\n' | b'\r' | b' '..=b'~' => false,
-        _ => true,
-    }
+    REQUIRES_ESCAPE_TABLE[byte as usize]
 }
 
 /// Encode the given input, and append the result to `output`. Returns
@@ -320,22 +376,12 @@ pub fn decode_to_vec(input: &[u8], output: &mut Vec<u8>) -> Result<usize, Decode
     Ok(written)
 }
 
+/// Convert a byte to its two-character uppercase hex representation.
 const fn byte_to_hex_bytes(byte: u8) -> [u8; 2] {
-    let high = byte >> 4;
-    let low = byte & 0x0F;
-
-    let high_byte = match high {
-        0..=9 => b'0' + high,
-        10..=15 => b'A' + high - 10,
-        _ => unreachable!(),
-    };
-    let low_byte = match low {
-        0..=9 => b'0' + low,
-        10..=15 => b'A' + low - 10,
-        _ => unreachable!(),
-    };
-
-    [high_byte, low_byte]
+    [
+        HEX_NIBBLE_ENCODE_TABLE[(byte >> 4) as usize],
+        HEX_NIBBLE_ENCODE_TABLE[(byte & 0x0F) as usize],
+    ]
 }
 
 const fn byte_to_hex_chars(byte: u8) -> [char; 2] {
@@ -343,47 +389,37 @@ const fn byte_to_hex_chars(byte: u8) -> [char; 2] {
     [high_byte as char, low_byte as char]
 }
 
+/// Decode two hex ASCII characters into a single byte.
+///
+/// Returns an error if:
+/// - Either character is not a valid hex digit (`InvalidHex`)
+/// - Either character is lowercase a-f (`LowercaseHex`)
+/// - The decoded byte doesn't require escaping (`UnexpectedEscape`)
 const fn hex_bytes_to_byte(high: u8, low: u8) -> Result<u8, DecodeError> {
-    enum HexCharResult {
-        Valid(u8),
-        Lowercase,
-        Invalid,
+    let high_value = HEX_NIBBLE_DECODE_TABLE[high as usize];
+    let low_value = HEX_NIBBLE_DECODE_TABLE[low as usize];
+
+    match (high_value, low_value) {
+        // Both valid hex digits (0x00-0x0F)
+        (0..=0x0F, 0..=0x0F) => {
+            let byte = (high_value << 4) | low_value;
+
+            if byte == b'`' || !requires_escape(byte) {
+                return Err(DecodeError::UnexpectedEscape(
+                    EscapedHex(high, low),
+                    byte as char,
+                ));
+            }
+
+            Ok(byte)
+        }
+        // At least one invalid character
+        (HEX_NIBBLE_DECODE_INVALID_ERR, _) | (_, HEX_NIBBLE_DECODE_INVALID_ERR) => {
+            Err(DecodeError::InvalidHex(EscapedHex(high, low)))
+        }
+        // Must be lowercase
+        _ => Err(DecodeError::LowercaseHex(EscapedHex(high, low))),
     }
-
-    let high_value = match high {
-        b'0'..=b'9' => HexCharResult::Valid(high - b'0'),
-        b'A'..=b'F' => HexCharResult::Valid(high - b'A' + 10),
-        b'a'..=b'f' => HexCharResult::Lowercase,
-        _ => HexCharResult::Invalid,
-    };
-
-    let low_value = match low {
-        b'0'..=b'9' => HexCharResult::Valid(low - b'0'),
-        b'A'..=b'F' => HexCharResult::Valid(low - b'A' + 10),
-        b'a'..=b'f' => HexCharResult::Lowercase,
-        _ => HexCharResult::Invalid,
-    };
-
-    let byte = match (high_value, low_value) {
-        (HexCharResult::Valid(high_value), HexCharResult::Valid(low_value)) => {
-            (high_value << 4) | low_value
-        }
-        (HexCharResult::Invalid, _) | (_, HexCharResult::Invalid) => {
-            return Err(DecodeError::InvalidHex(EscapedHex(high, low)));
-        }
-        (HexCharResult::Lowercase, _) | (_, HexCharResult::Lowercase) => {
-            return Err(DecodeError::LowercaseHex(EscapedHex(high, low)));
-        }
-    };
-
-    if byte == b'`' || !requires_escape(byte) {
-        return Err(DecodeError::UnexpectedEscape(
-            EscapedHex(high, low),
-            byte as char,
-        ));
-    }
-
-    Ok(byte)
 }
 
 #[cfg(feature = "safe")]
