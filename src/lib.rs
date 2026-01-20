@@ -27,7 +27,7 @@ use alloc::{borrow::Cow, string::String, vec::Vec};
 /// assert_eq!(encoded, "`00`FF");
 /// ```
 #[cfg(feature = "alloc")]
-pub fn encode(input: &[u8]) -> Cow<str> {
+pub fn encode(input: &[u8]) -> Cow<'_, str> {
     // Get the first index that needs to be escaped
     let escape_index = input.iter().position(|byte| requires_escape(*byte));
 
@@ -91,7 +91,7 @@ where
 /// assert_eq!(decoded, [0x00, 0xFF].as_slice());
 /// ```
 #[cfg(feature = "alloc")]
-pub fn decode(input: &[u8]) -> Result<Cow<[u8]>, DecodeError> {
+pub fn decode(input: &[u8]) -> Result<Cow<'_, [u8]>, DecodeError> {
     // Get the first index that isn't already a valid unescaped byte
     let escape_index = input.iter().position(|byte| requires_escape(*byte));
 
