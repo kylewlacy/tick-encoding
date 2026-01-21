@@ -17,7 +17,7 @@ alloc = []
 safe = []
 
 [dependencies]
-thiserror = { version = "2.0.11", optional = true }
+thiserror = { version = "2.0.18", optional = true }
 
 [dev-dependencies]
 assert_matches = "1.5.0"
