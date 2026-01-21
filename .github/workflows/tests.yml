@@ -8,15 +8,15 @@ on:
   workflow_call:
 
 env:
-  NIGHTLY_TOOLCHAIN: nightly-2024-01-27
+  NIGHTLY_TOOLCHAIN: nightly-2026-01-05
 
 jobs:
   check:
     name: Run checks
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Check formatting
         run: cargo fmt -- --check
       - name: Check Clippy
@@ -38,12 +38,12 @@ jobs:
           - "safe"
           - "none"
     name: Run tests (${{ matrix.toolchain }}, ${{ matrix.features }})
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       TOOLCHAIN: ${{ matrix.toolchain }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install toolchain
         run: rustup toolchain install "$TOOLCHAIN"
       - name: Run tests
@@ -74,18 +74,18 @@ jobs:
           PROPTEST_CASES: "10000"
   benchmark:
     name: Run benchmarks
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Run benchmarks
         run: cargo bench
   miri:
     name: Run Miri tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install Rust nightly toolchain
         run: |
           rustup toolchain install "$NIGHTLY_TOOLCHAIN" \
@@ -100,6 +100,6 @@ jobs:
   tests-passed:
     name: All tests passed
     needs: [check, test, benchmark, miri]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - run: "echo 'All tests passed'"
