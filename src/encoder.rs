@@ -9,6 +9,7 @@ pub enum Encoder {
 }
 
 impl Encoder {
+    #[inline]
     pub fn next(&mut self) -> Option<char> {
         match *self {
             Self::Ready => None,
@@ -23,6 +24,7 @@ impl Encoder {
         }
     }
 
+    #[inline]
     pub fn push(&mut self, byte: u8) -> char {
         if byte == b'`' {
             *self = Self::EmitOne(['`']);
