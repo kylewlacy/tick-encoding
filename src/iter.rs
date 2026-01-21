@@ -12,6 +12,7 @@ pub struct EncodeIter<I> {
 }
 
 impl<I> EncodeIter<I> {
+    #[inline]
     pub(crate) fn new(iter: I) -> Self {
         Self {
             iter,
@@ -20,16 +21,19 @@ impl<I> EncodeIter<I> {
     }
 
     /// Get a reference to the inner iterator.
+    #[inline]
     pub const fn inner(&self) -> &I {
         &self.iter
     }
 
     /// Get a mutable reference to the inner iterator.
+    #[inline]
     pub fn inner_mut(&mut self) -> &mut I {
         &mut self.iter
     }
 
     /// Take the inner iterator.
+    #[inline]
     pub fn into_inner(self) -> I {
         self.iter
     }
@@ -41,6 +45,7 @@ where
 {
     type Item = char;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(encoded) = self.encoder.next() {
             return Some(encoded);
@@ -60,6 +65,7 @@ pub struct DecodeIter<I> {
 }
 
 impl<I> DecodeIter<I> {
+    #[inline]
     pub(crate) fn new(iter: I) -> Self {
         Self {
             iter,
@@ -68,16 +74,19 @@ impl<I> DecodeIter<I> {
     }
 
     /// Get a reference to the inner iterator.
+    #[inline]
     pub const fn inner(&self) -> &I {
         &self.iter
     }
 
     /// Get a mutable reference to the inner iterator.
+    #[inline]
     pub fn inner_mut(&mut self) -> &mut I {
         &mut self.iter
     }
 
     /// Take the inner iterator.
+    #[inline]
     pub fn into_inner(self) -> I {
         self.iter
     }
@@ -89,6 +98,7 @@ where
 {
     type Item = Result<u8, DecodeError>;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             let next_byte = self.iter.next();

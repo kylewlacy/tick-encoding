@@ -268,6 +268,7 @@ pub fn decode_in_place(input: &mut [u8]) -> Result<&mut [u8], DecodeError> {
 /// - Carriage return (`\r`, 0x0D)
 /// - Space (` `, 0x20)
 /// - Printable characters except backtick (0x21 to 0x59, 0x61 to 0x7E)
+#[inline]
 #[must_use]
 pub const fn requires_escape(byte: u8) -> bool {
     REQUIRES_ESCAPE_TABLE[byte as usize]
@@ -392,6 +393,7 @@ pub fn decode_to_vec(input: &[u8], output: &mut Vec<u8>) -> Result<usize, Decode
 }
 
 /// Convert a nibble to its uppercase hex ASCII character.
+#[inline]
 const fn nibble_to_hex(n: u8) -> u8 {
     // 0-9 → '0'-'9'
     // 10-15 → 'A'-'F' (add 7 to skip the ASCII gap between '9' and 'A')
@@ -399,6 +401,7 @@ const fn nibble_to_hex(n: u8) -> u8 {
 }
 
 /// Convert a byte to its two-character uppercase hex representation.
+#[inline]
 const fn byte_to_hex_bytes(byte: u8) -> [u8; 2] {
     [nibble_to_hex(byte >> 4), nibble_to_hex(byte & 0x0F)]
 }
@@ -414,6 +417,7 @@ const fn byte_to_hex_chars(byte: u8) -> [char; 2] {
 /// - Either character is not a valid hex digit (`InvalidHex`)
 /// - Either character is lowercase a-f (`LowercaseHex`)
 /// - The decoded byte doesn't require escaping (`UnexpectedEscape`)
+#[inline]
 const fn hex_bytes_to_byte(high: u8, low: u8) -> Result<u8, DecodeError> {
     let high_value = HEX_NIBBLE_DECODE_TABLE[high as usize];
     let low_value = HEX_NIBBLE_DECODE_TABLE[low as usize];
