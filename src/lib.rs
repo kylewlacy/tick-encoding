@@ -33,9 +33,6 @@ const REQUIRES_ESCAPE_TABLE: [bool; 256] = {
     table
 };
 
-/// Lookup table for nibble to uppercase hex ASCII character.
-const HEX_NIBBLE_ENCODE_TABLE: [u8; 16] = *b"0123456789ABCDEF";
-
 const HEX_NIBBLE_DECODE_INVALID_ERR: u8 = 0xFF;
 const HEX_NIBBLE_DECODE_LOWERCASE_ERR: u8 = 0xFE;
 
@@ -376,12 +373,16 @@ pub fn decode_to_vec(input: &[u8], output: &mut Vec<u8>) -> Result<usize, Decode
     Ok(written)
 }
 
+/// Convert a nibble to its uppercase hex ASCII character.
+const fn nibble_to_hex(n: u8) -> u8 {
+    // 0-9 → '0'-'9'
+    // 10-15 → 'A'-'F' (add 7 to skip the ASCII gap between '9' and 'A')
+    n + b'0' + ((n > 9) as u8) * 7
+}
+
 /// Convert a byte to its two-character uppercase hex representation.
 const fn byte_to_hex_bytes(byte: u8) -> [u8; 2] {
-    [
-        HEX_NIBBLE_ENCODE_TABLE[(byte >> 4) as usize],
-        HEX_NIBBLE_ENCODE_TABLE[(byte & 0x0F) as usize],
-    ]
+    [nibble_to_hex(byte >> 4), nibble_to_hex(byte & 0x0F)]
 }
 
 const fn byte_to_hex_chars(byte: u8) -> [char; 2] {
