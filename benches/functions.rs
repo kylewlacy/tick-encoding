@@ -36,7 +36,7 @@ fn encode_to_vec_unescaped(bencher: divan::Bencher) {
 /// Benchmark encode_to_vec with binary content (worst case)
 #[divan::bench]
 fn encode_to_vec_binary(bencher: divan::Bencher) {
-    let bytes = vec![0x00u8; 1_000_000];
+    let bytes = vec![0x00; 1_000_000];
 
     bencher.bench_local(|| {
         let mut output = Vec::new();
@@ -74,7 +74,7 @@ fn encode_to_string_unescaped(bencher: divan::Bencher) {
 /// Benchmark encode_to_string with binary content (worst case)
 #[divan::bench]
 fn encode_to_string_binary(bencher: divan::Bencher) {
-    let bytes = vec![0x00u8; 1_000_000];
+    let bytes = vec![0x00; 1_000_000];
 
     bencher.bench_local(|| {
         let mut output = String::new();
@@ -112,7 +112,7 @@ fn decode_to_vec_unescaped(bencher: divan::Bencher) {
 /// Benchmark decode_to_vec with binary content (worst case)
 #[divan::bench]
 fn decode_to_vec_binary(bencher: divan::Bencher) {
-    let original = vec![0x00u8; 1_000_000];
+    let original = vec![0x00; 1_000_000];
     let encoded = tick_encoding::encode(&original);
     let encoded_bytes = encoded.as_bytes().to_vec();
 

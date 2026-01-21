@@ -27,7 +27,7 @@ fn encode_iter_ticks(bencher: divan::Bencher) {
 /// 100% binary - worst case (all bytes need escaping)
 #[divan::bench]
 fn encode_iter_binary(bencher: divan::Bencher) {
-    let bytes = vec![0x00u8; 1_000_000];
+    let bytes = vec![0x00; 1_000_000];
 
     bencher.bench_local(|| {
         tick_encoding::encode_iter(divan::black_box(bytes.iter().copied())).count()
@@ -88,7 +88,7 @@ fn decode_iter_unescaped(bencher: divan::Bencher) {
 fn decode_iter_ticks(bencher: divan::Bencher) {
     let original = vec![b'`'; 1_000_000];
     let encoded = tick_encoding::encode(&original);
-    let encoded_bytes: Vec<u8> = encoded.as_bytes().to_vec();
+    let encoded_bytes = encoded.as_bytes().to_vec();
 
     bencher.bench_local(|| {
         tick_encoding::decode_iter(divan::black_box(encoded_bytes.iter().copied()))
@@ -99,9 +99,9 @@ fn decode_iter_ticks(bencher: divan::Bencher) {
 /// 100% binary - worst case (all bytes need escaping)
 #[divan::bench]
 fn decode_iter_binary(bencher: divan::Bencher) {
-    let original = vec![0x00u8; 1_000_000];
+    let original = vec![0x00; 1_000_000];
     let encoded = tick_encoding::encode(&original);
-    let encoded_bytes: Vec<u8> = encoded.as_bytes().to_vec();
+    let encoded_bytes = encoded.as_bytes().to_vec();
 
     bencher.bench_local(|| {
         tick_encoding::decode_iter(divan::black_box(encoded_bytes.iter().copied()))
@@ -116,7 +116,7 @@ fn decode_iter_mixed_90_10(bencher: divan::Bencher) {
         .map(|i| if i % 10 == 0 { 0x00 } else { b'a' })
         .collect();
     let encoded = tick_encoding::encode(&original);
-    let encoded_bytes: Vec<u8> = encoded.as_bytes().to_vec();
+    let encoded_bytes = encoded.as_bytes().to_vec();
 
     bencher.bench_local(|| {
         tick_encoding::decode_iter(divan::black_box(encoded_bytes.iter().copied()))
@@ -131,7 +131,7 @@ fn decode_iter_mixed_50_50(bencher: divan::Bencher) {
         .map(|i| if i % 2 == 0 { 0x00 } else { b'a' })
         .collect();
     let encoded = tick_encoding::encode(&original);
-    let encoded_bytes: Vec<u8> = encoded.as_bytes().to_vec();
+    let encoded_bytes = encoded.as_bytes().to_vec();
 
     bencher.bench_local(|| {
         tick_encoding::decode_iter(divan::black_box(encoded_bytes.iter().copied()))
@@ -146,7 +146,7 @@ fn decode_iter_mixed_10_90(bencher: divan::Bencher) {
         .map(|i| if i % 10 == 0 { b'a' } else { 0x00 })
         .collect();
     let encoded = tick_encoding::encode(&original);
-    let encoded_bytes: Vec<u8> = encoded.as_bytes().to_vec();
+    let encoded_bytes = encoded.as_bytes().to_vec();
 
     bencher.bench_local(|| {
         tick_encoding::decode_iter(divan::black_box(encoded_bytes.iter().copied()))

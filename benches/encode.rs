@@ -86,7 +86,7 @@ fn encode_short_ascii(bencher: divan::Bencher, len: usize) {
 
 #[divan::bench(args = [16, 64, 256, 1024, 4096])]
 fn encode_short_binary(bencher: divan::Bencher, len: usize) {
-    let bytes = vec![0x00u8; len];
+    let bytes = vec![0x00; len];
 
     bencher.bench_local(|| {
         let encoded = tick_encoding::encode(divan::black_box(&bytes));

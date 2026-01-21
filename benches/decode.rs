@@ -92,7 +92,7 @@ fn decode_short_ascii(bencher: divan::Bencher, len: usize) {
 
 #[divan::bench(args = [16, 64, 256, 1024, 4096])]
 fn decode_short_binary(bencher: divan::Bencher, len: usize) {
-    let original = vec![0x00u8; len];
+    let original = vec![0x00; len];
     let encoded = tick_encoding::encode(&original);
 
     bencher.bench_local(|| {
