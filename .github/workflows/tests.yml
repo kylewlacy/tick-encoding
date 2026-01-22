@@ -81,7 +81,7 @@ jobs:
           - name: aarch64-linux
             runs-on: ubuntu-24.04-arm
     name: Run benchmarks [${{ matrix.name }}]
-    runs-on: ${{ matrix.include.runs-on }}
+    runs-on: ${{ matrix.runs-on }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
