@@ -9,6 +9,7 @@ on:
   workflow_call:
 
 env:
+  STABLE_TOOLCHAIN: 1.93.0
   NIGHTLY_TOOLCHAIN: nightly-2026-01-05
 
 jobs:
@@ -86,8 +87,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+      - name: Install Rust stable toolchain
+        run: rustup toolchain install "$STABLE_TOOLCHAIN"
       - name: Run benchmarks
-        run: cargo bench
+        run: cargo +"$STABLE_TOOLCHAIN" bench
   miri:
     name: Run Miri tests
     runs-on: ubuntu-24.04
