@@ -88,6 +88,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Save benchmark scripts
+        if: github.event_name == 'pull_request'
+        run: |
+          mkdir -p /tmp/bench-scripts
+          cp .github/scripts/parse_divan.py /tmp/bench-scripts/
+          cp .github/scripts/compare_benchmarks.py /tmp/bench-scripts/
+
       - name: Install Rust stable toolchain
         run: rustup toolchain install "$STABLE_TOOLCHAIN"
 
@@ -97,7 +104,7 @@ jobs:
       - name: Parse head benchmark results
         if: github.event_name == 'pull_request'
         run: |
-          .github/scripts/parse_divan.py \
+          /tmp/bench-scripts/parse_divan.py \
             head-benchmark.txt \
             --output head-benchmark.json
 
@@ -115,14 +122,14 @@ jobs:
       - name: Parse base benchmark results
         if: github.event_name == 'pull_request'
         run: |
-          .github/scripts/parse_divan.py \
+          /tmp/bench-scripts/parse_divan.py \
             base-benchmark.txt \
             --output base-benchmark.json
 
       - name: Generate comparison report
         if: github.event_name == 'pull_request'
         run: |
-          .github/scripts/compare_benchmarks.py \
+          /tmp/bench-scripts/compare_benchmarks.py \
             base-benchmark.json \
             head-benchmark.json \
             --title "Benchmark Results (${{ matrix.name }})" \
