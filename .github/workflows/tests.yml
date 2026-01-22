@@ -3,7 +3,8 @@ name: Tests
 on:
   push:
     branches:
-      - "*"
+      - main
+      - 'build/*'
   pull_request:
   workflow_call:
 
