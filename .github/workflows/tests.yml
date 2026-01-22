@@ -104,9 +104,21 @@ jobs:
           PROPTEST_CASES: "16"
           PROPTEST_DISABLE_FAILURE_PERSISTENCE: "true"
           MIRIFLAGS: "-Zmiri-env-forward=PROPTEST_DISABLE_FAILURE_PERSISTENCE -Zmiri-env-forward=PROPTEST_CASES"
+
+  # Extra job that succeeds when all test jobs succeed (useful for PR requirements)
   tests-passed:
     name: All tests passed
     needs: [check, test, benchmark, miri]
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-24.04
     steps:
-      - run: "echo 'All tests passed'"
+      - run: |
+          test "$CHECK_RESULT" = 'success'
+          test "$TEST_RESULT" = 'success'
+          test "$BENCHMARK_RESULT" = 'success'
+          test "$MIRI_RESULT" = 'success'
+        env:
+          CHECK_RESULT: ${{ needs.check.result }}
+          TEST_RESULT: ${{ needs.test.result }}
+          BENCHMARK_RESULT: ${{ needs.benchmark.result }}
+          MIRI_RESULT: ${{ needs.miri.result }}
