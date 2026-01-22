@@ -100,7 +100,7 @@ pub fn decode(input: &[u8]) -> Result<Cow<'_, [u8]>, DecodeError> {
             // We know everything up to `index` does not need to be unescaped
             let validated = &input[..index];
 
-            let mut output = Vec::with_capacity(validated.len() + 1);
+            let mut output = Vec::with_capacity(input.len());
             output.extend_from_slice(validated);
 
             // Decode the remainder of the input
