@@ -41,7 +41,7 @@ pub fn encode(input: &[u8]) -> Cow<'_, str> {
             // UTF-8, since nothing up to this point needs escaping
             let validated = from_utf8_unchecked_potentially_unsafe(validated);
 
-            let mut output = String::with_capacity(input.len() + 1);
+            let mut output = String::with_capacity(estimate_encoded_capacity(input.len()));
             output.push_str(validated);
 
             // Encode the remainder of the input
@@ -206,6 +206,15 @@ pub const fn requires_escape(byte: u8) -> bool {
     }
 }
 
+/// Estimate encoded capacity with a safety margin to minimize reallocations.
+///
+/// Assumes ~25% of bytes need escaping (3x expansion for those):
+/// input_len + input_len / 2 ≈ 1.5x, covers up to 25% escaped bytes
+#[inline]
+const fn estimate_encoded_capacity(input_len: usize) -> usize {
+    input_len.saturating_add(input_len / 2)
+}
+
 /// Encode the given input, and append the result to `output`. Returns
 /// the number of bytes / characters appended (only ASCII characters are
 /// appended).
@@ -222,7 +231,7 @@ pub const fn requires_escape(byte: u8) -> bool {
 #[cfg(feature = "alloc")]
 pub fn encode_to_string(input: &[u8], output: &mut String) -> usize {
     let mut written = 0;
-    output.reserve(input.len());
+    output.reserve(estimate_encoded_capacity(input.len()));
     for &byte in input {
         if byte == b'`' {
             output.push_str("``");
@@ -257,7 +266,7 @@ pub fn encode_to_string(input: &[u8], output: &mut String) -> usize {
 #[cfg(feature = "alloc")]
 pub fn encode_to_vec(input: &[u8], output: &mut Vec<u8>) -> usize {
     let mut written = 0;
-    output.reserve(input.len());
+    output.reserve(estimate_encoded_capacity(input.len()));
     for &byte in input {
         if byte == b'`' {
             output.extend_from_slice(b"``");
