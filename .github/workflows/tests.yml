@@ -87,10 +87,55 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+
       - name: Install Rust stable toolchain
         run: rustup toolchain install "$STABLE_TOOLCHAIN"
-      - name: Run benchmarks
-        run: cargo +"$STABLE_TOOLCHAIN" bench
+
+      - name: Run head benchmarks
+        run: cargo +"$STABLE_TOOLCHAIN" bench 2>&1 | tee head-benchmark.txt
+
+      - name: Parse head benchmark results
+        if: github.event_name == 'pull_request'
+        run: |
+          .github/scripts/parse_divan.py \
+            head-benchmark.txt \
+            --output head-benchmark.json
+
+      - name: Checkout base branch
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          clean: false
+
+      - name: Run base benchmarks
+        if: github.event_name == 'pull_request'
+        run: cargo +"$STABLE_TOOLCHAIN" bench 2>&1 | tee base-benchmark.txt
+
+      - name: Parse base benchmark results
+        if: github.event_name == 'pull_request'
+        run: |
+          .github/scripts/parse_divan.py \
+            base-benchmark.txt \
+            --output base-benchmark.json
+
+      - name: Generate comparison report
+        if: github.event_name == 'pull_request'
+        run: |
+          .github/scripts/compare_benchmarks.py \
+            base-benchmark.json \
+            head-benchmark.json \
+            --title "Benchmark Results (${{ matrix.name }})" \
+            --subtitle "Comparing ${{ github.event.pull_request.head.sha }} (head) vs ${{ github.event.pull_request.base.sha }} (base)" \
+            --output comment-body.md
+
+      - name: Upload benchmark report
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v6
+        with:
+          name: benchmark-report-${{ matrix.name }}
+          path: comment-body.md
+          retention-days: 7
   miri:
     name: Run Miri tests
     runs-on: ubuntu-24.04
