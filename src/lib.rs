@@ -30,34 +30,36 @@ use alloc::{borrow::Cow, string::String, vec::Vec};
 #[must_use]
 pub fn encode(input: &[u8]) -> Cow<'_, str> {
     // Get the first index that needs to be escaped
-    let escape_index = input.iter().position(|byte| requires_escape(*byte));
+    input
+        .iter()
+        .position(|byte| requires_escape(*byte))
+        // If no escape needed, borrow input. Otherwise encode from that index
+        .map_or_else(
+            || {
+                debug_assert!(input.is_ascii());
 
-    match escape_index {
-        Some(index) => {
-            // We know everything up to `index` does not require escaping
-            let validated = &input[..index];
-            debug_assert!(validated.is_ascii());
+                // SAFETY: We know the entire input is valid ASCII and UTF-8, and
+                // additionally doesn't require any bytes to be escaped
+                Cow::Borrowed(from_utf8_unchecked_potentially_unsafe(input))
+            },
+            |index| {
+                // We know everything up to `index` does not require escaping
+                let validated = &input[..index];
+                debug_assert!(validated.is_ascii());
 
-            // SAFETY: We know the input up to this point is valid ASCII and
-            // UTF-8, since nothing up to this point needs escaping
-            let validated = from_utf8_unchecked_potentially_unsafe(validated);
+                // SAFETY: We know the input up to this point is valid ASCII and
+                // UTF-8, since nothing up to this point needs escaping
+                let validated = from_utf8_unchecked_potentially_unsafe(validated);
 
-            let mut output = String::with_capacity(input.len() + 1);
-            output.push_str(validated);
+                let mut output = String::with_capacity(input.len() + 1);
+                output.push_str(validated);
 
-            // Encode the remainder of the input
-            let requires_encoding = &input[index..];
-            encode_to_string(requires_encoding, &mut output);
-            Cow::Owned(output)
-        }
-        None => {
-            debug_assert!(input.is_ascii());
-
-            // SAFETY: We know the entire input is valid ASCII and UTF-8, and
-            // additionally doesn't require any bytes to be escaped
-            Cow::Borrowed(from_utf8_unchecked_potentially_unsafe(input))
-        }
-    }
+                // Encode the remainder of the input
+                let requires_encoding = &input[index..];
+                encode_to_string(requires_encoding, &mut output);
+                Cow::Owned(output)
+            },
+        )
 }
 
 /// Return an iterator that encodes the bytes from the input iterator.
