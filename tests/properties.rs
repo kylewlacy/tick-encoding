@@ -44,7 +44,7 @@ proptest! {
         // Iterate over the string until we hit a decoding error. Then, get
         // the index of the iterator (the index where we hit the error).
         let mut possibly_encoded_iter = possibly_encoded_string.as_bytes().iter();
-        let _decode_error = tick_encoding::decode_iter(possibly_encoded_iter.by_ref().copied()).find_map(|result| result.err());
+        let _decode_error = tick_encoding::decode_iter(possibly_encoded_iter.by_ref().copied()).find_map(std::result::Result::err);
         let first_invalid_index = possibly_encoded_string.len() - possibly_encoded_iter.as_slice().len();
 
         // Because we may have hit an `UnexpectedEnd` error, we might need to
