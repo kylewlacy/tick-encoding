@@ -80,6 +80,10 @@ where
 /// Returns an error if the input isn't a valid ASCII string, or isn't a
 /// valid canonical tick-encoding.
 ///
+/// # Errors
+///
+/// Returns a [`DecodeError`] if the input is not valid tick-encoded data.
+///
 /// ## Example
 ///
 /// ```
@@ -129,10 +133,16 @@ where
     iter::DecodeIter::new(iter.into_iter())
 }
 
-/// Take a byte slice containing a tick-encoded ASCII string, and decode it
+/// Decode a tick-encoded ASCII string in-place.
+///
+/// Takes a byte slice containing a tick-encoded ASCII string, and decodes it
 /// in-place, writing back into the same byte slice. Returns a sub-slice
 /// containing just the decoded bytes (the bytes past the returned sub-slice
 /// are left unchanged).
+///
+/// # Errors
+///
+/// Returns a [`DecodeError`] if the input is not valid tick-encoded data.
 ///
 /// ## Example
 ///
@@ -276,10 +286,14 @@ pub fn encode_to_vec(input: &[u8], output: &mut Vec<u8>) -> usize {
     written
 }
 
-/// Decode the given tick-encoded ASCII input, and append the result to
-/// `output`. Returns the number of bytes appended. Returns an error
-/// if the result isn't a valid ASCII string, or isn't a valid canonical
-/// tick-encoding.
+/// Decode tick-encoded ASCII input and append the result to a vector.
+///
+/// Returns the number of bytes appended. Returns an error if the result
+/// isn't a valid ASCII string, or isn't a valid canonical tick-encoding.
+///
+/// # Errors
+///
+/// Returns a [`DecodeError`] if the input is not valid tick-encoded data.
 ///
 /// ## Example
 ///

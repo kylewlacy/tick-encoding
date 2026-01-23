@@ -2,7 +2,7 @@ fn main() {
     divan::main();
 }
 
-/// Benchmark requires_escape() across all byte values
+/// Benchmark `requires_escape()` across all byte values
 #[divan::bench]
 fn requires_escape_all_bytes(bencher: divan::Bencher) {
     let bytes: Vec<u8> = (0..=255u8).collect();
@@ -21,7 +21,7 @@ fn requires_escape_all_bytes(bencher: divan::Bencher) {
     });
 }
 
-/// Benchmark encode_to_vec with unescaped content
+/// Benchmark `encode_to_vec` with unescaped content
 #[divan::bench]
 fn encode_to_vec_unescaped(bencher: divan::Bencher) {
     let bytes = vec![b'a'; 1_000_000];
@@ -33,7 +33,7 @@ fn encode_to_vec_unescaped(bencher: divan::Bencher) {
     });
 }
 
-/// Benchmark encode_to_vec with binary content (worst case)
+/// Benchmark `encode_to_vec` with binary content (worst case)
 #[divan::bench]
 fn encode_to_vec_binary(bencher: divan::Bencher) {
     let bytes = vec![0x00; 1_000_000];
@@ -45,7 +45,7 @@ fn encode_to_vec_binary(bencher: divan::Bencher) {
     });
 }
 
-/// Benchmark encode_to_vec with mixed content
+/// Benchmark `encode_to_vec` with mixed content
 #[divan::bench]
 fn encode_to_vec_mixed_50_50(bencher: divan::Bencher) {
     let bytes: Vec<u8> = (0..1_000_000)
@@ -59,7 +59,7 @@ fn encode_to_vec_mixed_50_50(bencher: divan::Bencher) {
     });
 }
 
-/// Benchmark encode_to_string with unescaped content
+/// Benchmark `encode_to_string` with unescaped content
 #[divan::bench]
 fn encode_to_string_unescaped(bencher: divan::Bencher) {
     let bytes = vec![b'a'; 1_000_000];
@@ -71,7 +71,7 @@ fn encode_to_string_unescaped(bencher: divan::Bencher) {
     });
 }
 
-/// Benchmark encode_to_string with binary content (worst case)
+/// Benchmark `encode_to_string` with binary content (worst case)
 #[divan::bench]
 fn encode_to_string_binary(bencher: divan::Bencher) {
     let bytes = vec![0x00; 1_000_000];
@@ -83,7 +83,7 @@ fn encode_to_string_binary(bencher: divan::Bencher) {
     });
 }
 
-/// Benchmark encode_to_string with mixed content
+/// Benchmark `encode_to_string` with mixed content
 #[divan::bench]
 fn encode_to_string_mixed_50_50(bencher: divan::Bencher) {
     let bytes: Vec<u8> = (0..1_000_000)
@@ -97,7 +97,7 @@ fn encode_to_string_mixed_50_50(bencher: divan::Bencher) {
     });
 }
 
-/// Benchmark decode_to_vec with unescaped content
+/// Benchmark `decode_to_vec` with unescaped content
 #[divan::bench]
 fn decode_to_vec_unescaped(bencher: divan::Bencher) {
     let bytes = vec![b'a'; 1_000_000];
@@ -109,7 +109,7 @@ fn decode_to_vec_unescaped(bencher: divan::Bencher) {
     });
 }
 
-/// Benchmark decode_to_vec with binary content (worst case)
+/// Benchmark `decode_to_vec` with binary content (worst case)
 #[divan::bench]
 fn decode_to_vec_binary(bencher: divan::Bencher) {
     let original = vec![0x00; 1_000_000];
@@ -123,7 +123,7 @@ fn decode_to_vec_binary(bencher: divan::Bencher) {
     });
 }
 
-/// Benchmark decode_to_vec with mixed content
+/// Benchmark `decode_to_vec` with mixed content
 #[divan::bench]
 fn decode_to_vec_mixed_50_50(bencher: divan::Bencher) {
     let original: Vec<u8> = (0..1_000_000)
