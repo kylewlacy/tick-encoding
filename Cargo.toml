@@ -10,6 +10,11 @@ license = "MIT OR Unlicense"
 categories = ["encoding", "no-std", "no-std::no-alloc"]
 keywords = ["bytes", "binary", "encoding", "percent"]
 
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+
 [features]
 default = ["std"]
 std = ["alloc", "dep:thiserror"]
