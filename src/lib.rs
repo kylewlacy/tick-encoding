@@ -27,6 +27,7 @@ use alloc::{borrow::Cow, string::String, vec::Vec};
 /// assert_eq!(encoded, "`00`FF");
 /// ```
 #[cfg(feature = "alloc")]
+#[must_use]
 pub fn encode(input: &[u8]) -> Cow<'_, str> {
     // Get the first index that needs to be escaped
     let escape_index = input.iter().position(|byte| requires_escape(*byte));
@@ -208,6 +209,7 @@ pub fn decode_in_place(input: &mut [u8]) -> Result<&mut [u8], DecodeError> {
 /// - Carriage return (`\r`, 0x0D)
 /// - Space (` `, 0x20)
 /// - Printable characters except backtick (0x21 to 0x59, 0x61 to 0x7E)
+#[must_use]
 pub const fn requires_escape(byte: u8) -> bool {
     match byte {
         b'`' => true,
