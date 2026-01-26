@@ -84,36 +84,39 @@ const HEX_NIBBLE_DECODE_TABLE: [u8; 256] = {
 /// assert_eq!(encoded, "`00`FF");
 /// ```
 #[cfg(feature = "alloc")]
+#[must_use]
 pub fn encode(input: &[u8]) -> Cow<'_, str> {
     // Get the first index that needs to be escaped
-    let escape_index = input.iter().position(|byte| requires_escape(*byte));
+    input
+        .iter()
+        .position(|byte| requires_escape(*byte))
+        // If no escape needed, borrow input. Otherwise encode from that index
+        .map_or_else(
+            || {
+                debug_assert!(input.is_ascii());
 
-    match escape_index {
-        Some(index) => {
-            // We know everything up to `index` does not require escaping
-            let validated = &input[..index];
-            debug_assert!(validated.is_ascii());
+                // SAFETY: We know the entire input is valid ASCII and UTF-8, and
+                // additionally doesn't require any bytes to be escaped
+                Cow::Borrowed(from_utf8_unchecked_potentially_unsafe(input))
+            },
+            |index| {
+                // We know everything up to `index` does not require escaping
+                let validated = &input[..index];
+                debug_assert!(validated.is_ascii());
 
-            // SAFETY: We know the input up to this point is valid ASCII and
-            // UTF-8, since nothing up to this point needs escaping
-            let validated = from_utf8_unchecked_potentially_unsafe(validated);
+                // SAFETY: We know the input up to this point is valid ASCII and
+                // UTF-8, since nothing up to this point needs escaping
+                let validated = from_utf8_unchecked_potentially_unsafe(validated);
 
-            let mut output = String::with_capacity(input.len() + 1);
-            output.push_str(validated);
+                let mut output = String::with_capacity(input.len() + 1);
+                output.push_str(validated);
 
-            // Encode the remainder of the input
-            let requires_encoding = &input[index..];
-            encode_to_string(requires_encoding, &mut output);
-            Cow::Owned(output)
-        }
-        None => {
-            debug_assert!(input.is_ascii());
-
-            // SAFETY: We know the entire input is valid ASCII and UTF-8, and
-            // additionally doesn't require any bytes to be escaped
-            Cow::Borrowed(from_utf8_unchecked_potentially_unsafe(input))
-        }
-    }
+                // Encode the remainder of the input
+                let requires_encoding = &input[index..];
+                encode_to_string(requires_encoding, &mut output);
+                Cow::Owned(output)
+            },
+        )
 }
 
 /// Return an iterator that encodes the bytes from the input iterator.
@@ -136,6 +139,10 @@ where
 ///
 /// Returns an error if the input isn't a valid ASCII string, or isn't a
 /// valid canonical tick-encoding.
+///
+/// # Errors
+///
+/// Returns a [`DecodeError`] if the input is not valid tick-encoded data.
 ///
 /// ## Example
 ///
@@ -186,10 +193,16 @@ where
     iter::DecodeIter::new(iter.into_iter())
 }
 
-/// Take a byte slice containing a tick-encoded ASCII string, and decode it
+/// Decode a tick-encoded ASCII string in-place.
+///
+/// Takes a byte slice containing a tick-encoded ASCII string, and decodes it
 /// in-place, writing back into the same byte slice. Returns a sub-slice
 /// containing just the decoded bytes (the bytes past the returned sub-slice
 /// are left unchanged).
+///
+/// # Errors
+///
+/// Returns a [`DecodeError`] if the input is not valid tick-encoded data.
 ///
 /// ## Example
 ///
@@ -255,6 +268,7 @@ pub fn decode_in_place(input: &mut [u8]) -> Result<&mut [u8], DecodeError> {
 /// - Carriage return (`\r`, 0x0D)
 /// - Space (` `, 0x20)
 /// - Printable characters except backtick (0x21 to 0x59, 0x61 to 0x7E)
+#[must_use]
 pub const fn requires_escape(byte: u8) -> bool {
     REQUIRES_ESCAPE_TABLE[byte as usize]
 }
@@ -329,10 +343,14 @@ pub fn encode_to_vec(input: &[u8], output: &mut Vec<u8>) -> usize {
     written
 }
 
-/// Decode the given tick-encoded ASCII input, and append the result to
-/// `output`. Returns the number of bytes appended. Returns an error
-/// if the result isn't a valid ASCII string, or isn't a valid canonical
-/// tick-encoding.
+/// Decode tick-encoded ASCII input and append the result to a vector.
+///
+/// Returns the number of bytes appended. Returns an error if the result
+/// isn't a valid ASCII string, or isn't a valid canonical tick-encoding.
+///
+/// # Errors
+///
+/// Returns a [`DecodeError`] if the input is not valid tick-encoded data.
 ///
 /// ## Example
 ///

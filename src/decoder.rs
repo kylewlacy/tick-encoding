@@ -37,7 +37,7 @@ impl Decoder {
                     DecodeStatus::NeedMore
                 }
             }
-            (Self::Tick, None) | (Self::TickHalfHex(_), None) => {
+            (Self::Tick | Self::TickHalfHex(_), None) => {
                 *self = Self::Finished;
                 DecodeStatus::Emit(Some(Err(DecodeError::UnexpectedEnd)))
             }

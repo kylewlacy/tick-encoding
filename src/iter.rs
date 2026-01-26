@@ -20,7 +20,7 @@ impl<I> EncodeIter<I> {
     }
 
     /// Get a reference to the inner iterator.
-    pub fn inner(&self) -> &I {
+    pub const fn inner(&self) -> &I {
         &self.iter
     }
 
@@ -68,7 +68,7 @@ impl<I> DecodeIter<I> {
     }
 
     /// Get a reference to the inner iterator.
-    pub fn inner(&self) -> &I {
+    pub const fn inner(&self) -> &I {
         &self.iter
     }
 
