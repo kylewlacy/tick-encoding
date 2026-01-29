@@ -10,6 +10,7 @@ pub enum Decoder {
 }
 
 impl Decoder {
+    #[inline]
     pub fn push(&mut self, input: Option<u8>) -> DecodeStatus {
         match (*self, input) {
             (Self::Finished, _) => DecodeStatus::Emit(None),
