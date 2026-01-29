@@ -135,7 +135,7 @@ where
 }
 
 /// Decode the given encoded input into a byte array. If no bytes need to
-/// be un-escapeed, then the result will be borrowed from the input.
+/// be un-escaped, then the result will be borrowed from the input.
 ///
 /// Returns an error if the input isn't a valid ASCII string, or isn't a
 /// valid canonical tick-encoding.
