@@ -29,7 +29,7 @@
 - Initial release!
 
 [Unreleased]: https://github.com/kylewlacy/tick-encoding/compare/v0.1.3...HEAD
-[v0.1.2]: https://github.com/kylewlacy/tick-encoding/releases/tag/v0.1.3
+[v0.1.3]: https://github.com/kylewlacy/tick-encoding/releases/tag/v0.1.3
 [v0.1.2]: https://github.com/kylewlacy/tick-encoding/releases/tag/v0.1.2
 [v0.1.1]: https://github.com/kylewlacy/tick-encoding/releases/tag/v0.1.1
 [v0.1.0]: https://github.com/kylewlacy/tick-encoding/releases/tag/v0.1.0
